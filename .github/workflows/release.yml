@@ -1,0 +1,309 @@
+# Pokemon GO 游戏发布工作流
+# 开发心理：自动化构建和发布流程，确保跨平台兼容性
+# 支持Windows, macOS, Linux三大平台的自动构建和发布
+
+name: 🎮 Pokemon GO Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # 当推送版本标签时触发
+  release:
+    types: [created]
+  workflow_dispatch:  # 手动触发
+
+env:
+  CARGO_TERM_COLOR: always
+  GAME_NAME: pokemongo
+
+jobs:
+  # Windows 构建任务
+  build-windows:
+    name: 🪟 Windows Build
+    runs-on: windows-latest
+    
+    steps:
+    - name: 📦 Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: 🦀 Setup Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: stable
+        target: x86_64-pc-windows-msvc
+        
+    - name: 🔧 Setup CMake
+      uses: jwlawson/actions-setup-cmake@v1
+      with:
+        cmake-version: '3.20'
+        
+    - name: 🏗️ Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+      
+    - name: 📋 Install Dependencies
+      run: |
+        echo "安装Windows构建依赖"
+        
+    - name: 🚀 Build C++ Native Modules
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release -A x64
+        cmake --build . --config Release --parallel
+        cd ..
+        
+    - name: 🦀 Build Rust Project
+      run: |
+        cargo build --release --no-default-features --target x86_64-pc-windows-msvc
+        
+    - name: 🧪 Run Tests
+      run: |
+        cargo test --no-default-features --target x86_64-pc-windows-msvc
+        
+    - name: 📦 Package Windows Release
+      run: |
+        mkdir pokemon-go-windows
+        copy target\x86_64-pc-windows-msvc\release\pokemongo.exe pokemon-go-windows\
+        copy target\x86_64-pc-windows-msvc\release\*.dll pokemon-go-windows\ 2>nul || echo "No DLLs to copy"
+        xcopy assets pokemon-go-windows\assets\ /E /I /Y
+        copy README.md pokemon-go-windows\
+        copy GAME_MODES.md pokemon-go-windows\
+        
+        # 创建启动脚本
+        echo @echo off > pokemon-go-windows\run.bat
+        echo echo 🎮 启动 Pokemon GO 高性能游戏... >> pokemon-go-windows\run.bat
+        echo pokemongo.exe >> pokemon-go-windows\run.bat
+        echo pause >> pokemon-go-windows\run.bat
+        
+        # 压缩发布包
+        powershell Compress-Archive -Path pokemon-go-windows -DestinationPath pokemon-go-windows-x64.zip
+        
+    - name: 📤 Upload Windows Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: pokemon-go-windows-x64
+        path: pokemon-go-windows-x64.zip
+        retention-days: 30
+
+  # macOS 构建任务
+  build-macos:
+    name: 🍎 macOS Build
+    runs-on: macos-latest
+    
+    steps:
+    - name: 📦 Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: 🦀 Setup Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: stable
+        target: x86_64-apple-darwin
+        
+    - name: 🔧 Setup CMake
+      run: brew install cmake
+      
+    - name: 🚀 Build C++ Native Modules
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        make -j$(sysctl -n hw.ncpu)
+        cd ..
+        
+    - name: 🦀 Build Rust Project
+      run: |
+        cargo build --release --no-default-features --target x86_64-apple-darwin
+        
+    - name: 🧪 Run Tests
+      run: |
+        cargo test --no-default-features --target x86_64-apple-darwin
+        
+    - name: 📦 Package macOS Release
+      run: |
+        mkdir pokemon-go-macos
+        cp target/x86_64-apple-darwin/release/pokemongo pokemon-go-macos/
+        cp -r assets pokemon-go-macos/
+        cp README.md GAME_MODES.md pokemon-go-macos/
+        
+        # 创建启动脚本
+        echo '#!/bin/bash' > pokemon-go-macos/run.sh
+        echo 'echo "🎮 启动 Pokemon GO 高性能游戏..."' >> pokemon-go-macos/run.sh
+        echo './pokemongo' >> pokemon-go-macos/run.sh
+        chmod +x pokemon-go-macos/run.sh
+        chmod +x pokemon-go-macos/pokemongo
+        
+        tar -czf pokemon-go-macos-x64.tar.gz pokemon-go-macos
+        
+    - name: 📤 Upload macOS Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: pokemon-go-macos-x64
+        path: pokemon-go-macos-x64.tar.gz
+        retention-days: 30
+
+  # Linux 构建任务
+  build-linux:
+    name: 🐧 Linux Build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📦 Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: 🦀 Setup Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: stable
+        target: x86_64-unknown-linux-gnu
+        
+    - name: 📋 Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake build-essential pkg-config \
+          libasound2-dev libudev-dev libxcb1-dev libxcb-render-dev \
+          libxcb-shape-dev libxcb-xfixes-dev libspeechd-dev libxkbcommon-dev \
+          libssl-dev libatk-bridge2.0-dev libgtk-3-dev
+          
+    - name: 🚀 Build C++ Native Modules
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        make -j$(nproc)
+        cd ..
+        
+    - name: 🦀 Build Rust Project
+      run: |
+        cargo build --release --no-default-features --target x86_64-unknown-linux-gnu
+        
+    - name: 🧪 Run Tests
+      run: |
+        cargo test --no-default-features --target x86_64-unknown-linux-gnu
+        
+    - name: 📦 Package Linux Release
+      run: |
+        mkdir pokemon-go-linux
+        cp target/x86_64-unknown-linux-gnu/release/pokemongo pokemon-go-linux/
+        cp -r assets pokemon-go-linux/
+        cp README.md GAME_MODES.md pokemon-go-linux/
+        
+        # 创建启动脚本
+        echo '#!/bin/bash' > pokemon-go-linux/run.sh
+        echo 'echo "🎮 启动 Pokemon GO 高性能游戏..."' >> pokemon-go-linux/run.sh
+        echo './pokemongo' >> pokemon-go-linux/run.sh
+        chmod +x pokemon-go-linux/run.sh
+        chmod +x pokemon-go-linux/pokemongo
+        
+        tar -czf pokemon-go-linux-x64.tar.gz pokemon-go-linux
+        
+    - name: 📤 Upload Linux Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: pokemon-go-linux-x64
+        path: pokemon-go-linux-x64.tar.gz
+        retention-days: 30
+
+  # 创建GitHub Release
+  create-release:
+    name: 🚀 Create GitHub Release
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: 📦 Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: 📥 Download All Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./artifacts
+        
+    - name: 📋 Generate Release Notes
+      id: release_notes
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        
+        cat > release_notes.md << EOF
+        # 🎮 Pokemon GO $VERSION 发布
+        
+        ## 📦 下载
+        
+        ### Windows (推荐)
+        - **pokemon-go-windows-x64.zip** - Windows 10/11 x64版本
+        - 下载后解压，运行 \`run.bat\` 即可开始游戏
+        
+        ### macOS
+        - **pokemon-go-macos-x64.tar.gz** - macOS 10.15+ x64版本
+        - 下载后解压，运行 \`./run.sh\` 开始游戏
+        
+        ### Linux
+        - **pokemon-go-linux-x64.tar.gz** - Ubuntu 20.04+ x64版本
+        - 下载后解压，运行 \`./run.sh\` 开始游戏
+        
+        ## ✨ 新特性
+        - 🚀 高性能Rust + C++混合架构
+        - 🎨 基于Bevy引擎的现代图形渲染
+        - 🔊 高质量音频系统
+        - 🌐 支持单机和多人模式
+        - 🎮 完整的宝可梦战斗系统
+        
+        ## 💻 系统要求
+        
+        ### Windows
+        - Windows 10/11 (64位)
+        - 4GB RAM
+        - DirectX 12兼容显卡
+        - 1GB可用存储空间
+        
+        ### macOS
+        - macOS 10.15+
+        - 4GB RAM
+        - Metal兼容显卡
+        - 1GB可用存储空间
+        
+        ### Linux
+        - Ubuntu 20.04+ 或兼容发行版
+        - 4GB RAM
+        - Vulkan兼容显卡
+        - 1GB可用存储空间
+        
+        ## 🎯 快速开始
+        1. 下载对应平台的压缩包
+        2. 解压到任意目录
+        3. 运行启动脚本开始游戏
+        4. 享受高性能宝可梦游戏体验！
+        
+        ---
+        
+        **注意**: 这是一个学习项目，仅供教育用途。
+        EOF
+        
+    - name: 🎉 Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.release_notes.outputs.version }}
+        name: Pokemon GO ${{ steps.release_notes.outputs.version }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
+        files: |
+          artifacts/pokemon-go-windows-x64/pokemon-go-windows-x64.zip
+          artifacts/pokemon-go-macos-x64/pokemon-go-macos-x64.tar.gz
+          artifacts/pokemon-go-linux-x64/pokemon-go-linux-x64.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 📊 Build Summary
+      run: |
+        echo "## 🎮 Pokemon GO 构建完成!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| 平台 | 状态 | 文件 |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|------|------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Windows x64 | ✅ 成功 | pokemon-go-windows-x64.zip |" >> $GITHUB_STEP_SUMMARY
+        echo "| macOS x64 | ✅ 成功 | pokemon-go-macos-x64.tar.gz |" >> $GITHUB_STEP_SUMMARY
+        echo "| Linux x64 | ✅ 成功 | pokemon-go-linux-x64.tar.gz |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "🚀 **Release**: ${{ steps.release_notes.outputs.version }}" >> $GITHUB_STEP_SUMMARY

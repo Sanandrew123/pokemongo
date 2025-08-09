@@ -1,0 +1,45 @@
+# Rust
+/target
+Cargo.lock
+*.pdb
+
+# C++
+build/
+*.o
+*.so
+*.dll
+*.dylib
+*.a
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+logs/
+
+# 临时文件
+tmp/
+temp/
+
+# 游戏资源 (大文件)
+assets/textures/pokemon/sprites/*.png
+assets/audio/music/*.ogg
+assets/audio/sfx/*.wav
+
+# 生成文件
+assets/data/creatures/generated/
+bindings.rs
+
+# 性能测试结果
+target/criterion/
+
+# 保留目录结构文件
+!.gitkeep
