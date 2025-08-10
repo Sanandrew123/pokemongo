@@ -2,18 +2,19 @@
 // 开发心理：战斗是宝可梦游戏的核心体验，需要精确的回合制逻辑和丰富的策略性
 // 设计原则：状态机驱动、事件响应式、可扩展的技能系统、公平的随机性
 
+// 逐步实现子模块
 pub mod engine;
 pub mod turn_manager;
 pub mod damage_calculator;
-pub mod status_effects;
-pub mod animation;
+// pub mod status_effects;
+// pub mod animation;
 
-// 重新导出主要类型
-pub use engine::{BattleEngine, BattleResult};
-pub use turn_manager::{TurnManager, TurnPhase, ActionPriority};
-pub use damage_calculator::{DamageCalculator, DamageResult, CriticalHitCalc};
-pub use status_effects::{StatusEffect, StatusManager, EffectTrigger};
-pub use animation::{BattleAnimator, AnimationType, AnimationQueue};
+// 重新导出已实现的类型
+pub use engine::{BattleEngine, BattleLogEntry, BattleActionResult};
+pub use turn_manager::{TurnManager as NewTurnManager, BattleAction, ActionResult, TurnResult, ParticipantId};
+pub use damage_calculator::{DamageCalculator as NewDamageCalculator, DamageResult as NewDamageResult, DamageContext};
+// pub use status_effects::{StatusEffect, StatusManager, EffectTrigger};
+// pub use animation::{BattleAnimator, AnimationType, AnimationQueue};
 
 use crate::core::{GameError, Result};
 use crate::pokemon::{Pokemon, Move, MoveId};
@@ -22,6 +23,74 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 use std::time::{Duration, Instant};
 use log::{info, debug, warn};
+
+// 临时类型定义，避免编译错误
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TurnPhase {
+    ActionSelection,
+    ExecuteActions,
+    EndTurn,
+}
+
+pub struct TurnManager;
+pub struct DamageCalculator;
+pub struct StatusManager;
+pub struct BattleAnimator;
+
+// 临时结构定义
+#[derive(Debug, Clone)]
+pub struct DamageResult {
+    pub damage: u16,
+    pub is_critical: bool,
+    pub effectiveness: f32,
+}
+
+#[derive(Debug, Clone)]
+pub struct SecondaryEffect {
+    pub effect_type: String,
+    pub chance: f32,
+}
+
+impl TurnManager {
+    pub fn new() -> Self { Self }
+    pub fn add_action(&mut self, _trainer_id: u64, _action: BattleAction) -> Result<()> { Ok(()) }
+    pub fn all_actions_submitted(&self, _participants: &[BattleParticipant]) -> bool { true }
+    pub fn get_sorted_actions(&self, _participants: &[BattleParticipant]) -> Result<Vec<(u64, BattleAction)>> { Ok(vec![]) }
+    pub fn clear_actions(&mut self) {}
+}
+
+impl DamageCalculator {
+    pub fn new() -> Self { Self }
+    pub fn calculate_damage(
+        &self, 
+        _user: &Pokemon, 
+        _target: &Pokemon, 
+        _move_data: &Move, 
+        _env: &BattleEnvironment
+    ) -> Result<DamageResult> {
+        Ok(DamageResult {
+            damage: 50,
+            hit: true,
+            critical: false,
+            type_effectiveness: 1.0,
+        })
+    }
+}
+
+// DamageResult重复定义已移除，使用第一个定义
+
+impl StatusManager {
+    pub fn new() -> Self { Self }
+    pub fn apply_effect(&mut self, _target_id: u64, _effect: SecondaryEffect) -> Result<()> { Ok(()) }
+    pub fn process_end_turn_effects(&mut self, _participants: &mut [BattleParticipant]) -> Result<()> { Ok(()) }
+}
+
+// SecondaryEffect重复定义已移除，使用第一个定义
+
+impl BattleAnimator {
+    pub fn new() -> Self { Self }
+    pub fn start_move_animation(&mut self, _trainer_id: u64, _pokemon_index: usize, _move_id: MoveId) -> Result<()> { Ok(()) }
+}
 
 // 战斗类型
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -47,7 +116,7 @@ pub enum BattleFormat {
 
 // 战斗状态
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum BattleState {
+pub enum BattleStatus {
     Initializing,
     WaitingForAction,
     ProcessingTurn,
@@ -57,15 +126,98 @@ pub enum BattleState {
     BattleEnd,
 }
 
+// 新的战斗状态结构（用于turn_manager）
+#[derive(Debug, Clone)]
+pub struct BattleState {
+    participants: Vec<BattleParticipant>,
+    battle_ended: bool,
+}
+
+impl BattleState {
+    pub fn new(participants: Vec<BattleParticipant>) -> Self {
+        Self {
+            participants,
+            battle_ended: false,
+        }
+    }
+    
+    pub fn get_participant_count(&self) -> usize {
+        self.participants.len()
+    }
+    
+    pub fn get_participants(&self) -> &[BattleParticipant] {
+        &self.participants
+    }
+    
+    pub fn get_active_pokemon(&self, participant_id: usize) -> Option<&Pokemon> {
+        self.participants.get(participant_id)?
+            .active_pokemon.get(0)?
+            .map(|&idx| &self.participants[participant_id].pokemon[idx])
+    }
+    
+    pub fn get_active_pokemon_mut(&mut self, participant_id: usize) -> Option<&mut Pokemon> {
+        let active_idx = self.participants.get(participant_id)?
+            .active_pokemon.get(0)?
+            .clone()?;
+        Some(&mut self.participants[participant_id].pokemon[active_idx])
+    }
+    
+    pub fn get_active_pokemon_index(&self, participant_id: usize) -> usize {
+        self.participants.get(participant_id)
+            .and_then(|p| p.active_pokemon.get(0))
+            .and_then(|&idx| idx)
+            .unwrap_or(0)
+    }
+    
+    pub fn switch_pokemon(&mut self, participant_id: usize, new_index: usize) -> Result<bool> {
+        if let Some(participant) = self.participants.get_mut(participant_id) {
+            if new_index < participant.pokemon.len() && !participant.pokemon[new_index].is_fainted() {
+                if let Some(active_slot) = participant.active_pokemon.get_mut(0) {
+                    *active_slot = Some(new_index);
+                    return Ok(true);
+                }
+            }
+        }
+        Ok(false)
+    }
+    
+    pub fn is_battle_ended(&self) -> bool {
+        self.battle_ended
+    }
+    
+    pub fn set_battle_ended(&mut self, ended: bool) {
+        self.battle_ended = ended;
+    }
+}
+
 // 战斗参与者
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BattleParticipant {
     pub trainer_id: u64,
     pub trainer_name: String,
-    pub team: Vec<Pokemon>,
+    pub pokemon: Vec<Pokemon>, // 原名为team，但为兼容性改为pokemon
+    pub active_pokemon_index: usize,
     pub active_pokemon: Vec<Option<usize>>, // 场上宝可梦索引
     pub is_ai: bool,
     pub ai_difficulty: AIDifficulty,
+}
+
+impl BattleParticipant {
+    pub fn new(pokemon: Vec<Pokemon>) -> Self {
+        Self {
+            trainer_id: fastrand::u64(1..),
+            trainer_name: "Trainer".to_string(),
+            pokemon,
+            active_pokemon_index: 0,
+            active_pokemon: vec![Some(0)],
+            is_ai: false,
+            ai_difficulty: AIDifficulty::Normal,
+        }
+    }
+    
+    pub fn team(&self) -> &[Pokemon] {
+        &self.pokemon
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -177,7 +329,8 @@ impl Event for BattleEndEvent {
 // 战斗环境
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BattleEnvironment {
-    pub weather: WeatherCondition,
+    pub weather: Option<crate::pokemon::moves::WeatherType>,
+    pub weather_turns: Option<u8>,
     pub terrain: TerrainType,
     pub field_effects: Vec<FieldEffect>,
     pub trick_room: bool,
@@ -233,7 +386,8 @@ pub enum FieldEffectType {
 impl Default for BattleEnvironment {
     fn default() -> Self {
         Self {
-            weather: WeatherCondition::None,
+            weather: None,
+            weather_turns: None,
             terrain: TerrainType::None,
             field_effects: Vec::new(),
             trick_room: false,
@@ -286,7 +440,7 @@ pub struct BattleContext {
     pub config: BattleConfig,
     pub participants: Vec<BattleParticipant>,
     pub environment: BattleEnvironment,
-    pub state: BattleState,
+    pub state: BattleStatus,
     
     pub turn_number: u32,
     pub start_time: Instant,
@@ -325,7 +479,7 @@ impl BattleContext {
         
         // 验证参与者队伍
         for participant in &participants {
-            if participant.team.is_empty() {
+            if participant.pokemon.is_empty() {
                 return Err(GameError::BattleError("参与者队伍不能为空".to_string()));
             }
         }
@@ -335,7 +489,7 @@ impl BattleContext {
             config,
             participants,
             environment: BattleEnvironment::default(),
-            state: BattleState::Initializing,
+            state: BattleStatus::Initializing,
             
             turn_number: 0,
             start_time: Instant::now(),
@@ -366,7 +520,7 @@ impl BattleContext {
             
             // 自动选择前几只健康的宝可梦上场
             let mut active_index = 0;
-            for (i, pokemon) in participant.team.iter().enumerate() {
+            for (i, pokemon) in participant.pokemon.iter().enumerate() {
                 if !pokemon.is_fainted() && active_index < active_count {
                     participant.active_pokemon[active_index] = Some(i);
                     active_index += 1;
@@ -374,7 +528,7 @@ impl BattleContext {
             }
         }
         
-        self.state = BattleState::WaitingForAction;
+        self.state = BattleStatus::WaitingForAction;
         self.turn_number = 1;
         
         // 发送战斗开始事件
@@ -388,7 +542,7 @@ impl BattleContext {
     
     // 提交行动
     pub fn submit_action(&mut self, trainer_id: u64, action: BattleAction) -> Result<()> {
-        if self.state != BattleState::WaitingForAction {
+        if self.state != BattleStatus::WaitingForAction {
             return Err(GameError::BattleError("当前不是行动选择阶段".to_string()));
         }
         
@@ -408,7 +562,7 @@ impl BattleContext {
     
     // 处理回合
     fn process_turn(&mut self) -> Result<()> {
-        self.state = BattleState::ProcessingTurn;
+        self.state = BattleStatus::ProcessingTurn;
         
         debug!("处理回合 #{}", self.turn_number);
         
@@ -433,7 +587,7 @@ impl BattleContext {
         } else {
             // 准备下一回合
             self.turn_number += 1;
-            self.state = BattleState::WaitingForAction;
+            self.state = BattleStatus::WaitingForAction;
             self.turn_manager.clear_actions();
             
             EventSystem::dispatch(BattleTurnStartEvent {
@@ -483,7 +637,7 @@ impl BattleContext {
             .position(|&slot| slot == Some(pokemon_index))
             .ok_or_else(|| GameError::BattleError("宝可梦不在场上".to_string()))?;
         
-        let pokemon = &mut participant.team[pokemon_index];
+        let pokemon = &mut participant.pokemon[pokemon_index];
         
         // 检查宝可梦状态
         if pokemon.is_fainted() {
@@ -507,7 +661,7 @@ impl BattleContext {
         move_slot.current_pp -= 1;
         
         // 动画开始
-        self.state = BattleState::AnimatingMove;
+        self.state = BattleStatus::AnimatingMove;
         self.animator.start_move_animation(trainer_id, pokemon_index, move_slot.move_id)?;
         
         // 计算伤害和效果
@@ -582,7 +736,7 @@ impl BattleContext {
         let participant = self.get_participant_mut(trainer_id)?;
         
         // 验证切换的合法性
-        if participant.team[to_index].is_fainted() {
+        if participant.pokemon[to_index].is_fainted() {
             return Err(GameError::BattleError("无法切换到濒死的宝可梦".to_string()));
         }
         
@@ -598,8 +752,8 @@ impl BattleContext {
         
         info!("{}切换宝可梦: {} -> {}", 
               participant.trainer_name,
-              participant.team[from_index].get_display_name(),
-              participant.team[to_index].get_display_name());
+              participant.pokemon[from_index].get_display_name(),
+              participant.pokemon[to_index].get_display_name());
         
         Ok(())
     }
@@ -651,11 +805,11 @@ impl BattleContext {
         
         match action {
             BattleAction::UseMove { pokemon_index, move_index, .. } => {
-                if *pokemon_index >= participant.team.len() {
+                if *pokemon_index >= participant.pokemon.len() {
                     return Err(GameError::BattleError("无效的宝可梦索引".to_string()));
                 }
                 
-                let pokemon = &participant.team[*pokemon_index];
+                let pokemon = &participant.pokemon[*pokemon_index];
                 if pokemon.is_fainted() {
                     return Err(GameError::BattleError("濒死宝可梦无法行动".to_string()));
                 }
@@ -669,11 +823,11 @@ impl BattleContext {
                 }
             },
             BattleAction::SwitchPokemon { to_index, .. } => {
-                if *to_index >= participant.team.len() {
+                if *to_index >= participant.pokemon.len() {
                     return Err(GameError::BattleError("无效的宝可梦索引".to_string()));
                 }
                 
-                if participant.team[*to_index].is_fainted() {
+                if participant.pokemon[*to_index].is_fainted() {
                     return Err(GameError::BattleError("无法切换到濒死宝可梦".to_string()));
                 }
             },
@@ -716,7 +870,7 @@ impl BattleContext {
         let participant = self.get_participant(target_id)?;
         let active_index = participant.active_pokemon[0]
             .ok_or_else(|| GameError::BattleError("目标没有活跃宝可梦".to_string()))?;
-        Ok(&participant.team[active_index])
+        Ok(&participant.pokemon[active_index])
     }
     
     fn apply_damage(&mut self, target_id: u64, damage: u16) -> Result<()> {
@@ -724,7 +878,7 @@ impl BattleContext {
         let active_index = participant.active_pokemon[0]
             .ok_or_else(|| GameError::BattleError("目标没有活跃宝可梦".to_string()))?;
         
-        let pokemon = &mut participant.team[active_index];
+        let pokemon = &mut participant.pokemon[active_index];
         let fainted = pokemon.take_damage(damage);
         
         if fainted {
@@ -741,12 +895,12 @@ impl BattleContext {
     }
     
     fn check_and_handle_faints(&mut self) -> Result<()> {
-        self.state = BattleState::CheckingFaint;
+        self.state = BattleStatus::CheckingFaint;
         
         for participant in &mut self.participants {
             for (i, active_slot) in participant.active_pokemon.iter_mut().enumerate() {
                 if let Some(pokemon_index) = *active_slot {
-                    if participant.team[pokemon_index].is_fainted() {
+                    if participant.pokemon[pokemon_index].is_fainted() {
                         *active_slot = None;
                         
                         // 寻找替补宝可梦
@@ -758,8 +912,8 @@ impl BattleContext {
                         
                         if let Some(new_index) = replacement {
                             *active_slot = Some(new_index);
-                            self.state = BattleState::SwitchingPokemon;
-                            info!("自动切换宝可梦: {}", participant.team[new_index].get_display_name());
+                            self.state = BattleStatus::SwitchingPokemon;
+                            info!("自动切换宝可梦: {}", participant.pokemon[new_index].get_display_name());
                         }
                     }
                 }
@@ -792,7 +946,7 @@ impl BattleContext {
                 for participant in &mut self.participants {
                     for &active_index in &participant.active_pokemon {
                         if let Some(pokemon_index) = active_index {
-                            let pokemon = &mut participant.team[pokemon_index];
+                            let pokemon = &mut participant.pokemon[pokemon_index];
                             if !pokemon.get_species().unwrap().types.contains(&crate::pokemon::PokemonType::Rock) &&
                                !pokemon.get_species().unwrap().types.contains(&crate::pokemon::PokemonType::Ground) &&
                                !pokemon.get_species().unwrap().types.contains(&crate::pokemon::PokemonType::Steel) {
@@ -826,21 +980,21 @@ impl BattleContext {
     fn is_battle_ended(&self) -> bool {
         // 检查是否有参与者失去所有宝可梦
         self.participants.iter().any(|p| {
-            p.team.iter().all(|pokemon| pokemon.is_fainted())
+            p.pokemon.iter().all(|pokemon| pokemon.is_fainted())
         })
     }
     
     fn end_battle(&mut self) -> Result<()> {
         let winner_id = self.participants
             .iter()
-            .find(|p| p.team.iter().any(|pokemon| !pokemon.is_fainted()))
+            .find(|p| p.pokemon.iter().any(|pokemon| !pokemon.is_fainted()))
             .map(|p| p.trainer_id);
         
         self.end_battle_with_result(winner_id)
     }
     
     fn end_battle_with_result(&mut self, winner_id: Option<u64>) -> Result<()> {
-        self.state = BattleState::BattleEnd;
+        self.state = BattleStatus::BattleEnd;
         let duration = self.start_time.elapsed();
         
         info!("战斗结束! 获胜者: {:?}, 持续时间: {:?}", winner_id, duration);
@@ -861,7 +1015,7 @@ impl BattleContext {
         let active_index = participant.active_pokemon[0]
             .ok_or_else(|| GameError::BattleError("没有活跃宝可梦".to_string()))?;
         
-        let player_speed = participant.team[active_index].get_stats()?.speed;
+        let player_speed = participant.pokemon[active_index].get_stats()?.speed;
         
         // 基础逃跑率，可以根据速度、等级等调整
         let base_chance = 0.5f32;

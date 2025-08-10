@@ -15,11 +15,16 @@ fn main() {
     println!("cargo:rustc-env=TARGET_OS={}", target_os);
     println!("cargo:rustc-env=TARGET_ARCH={}", target_arch);
     
-    // 编译C++模块
-    build_cpp_modules();
-    
-    // 生成FFI绑定
-    generate_bindings();
+    // 检查是否启用了native feature
+    if env::var("CARGO_FEATURE_NATIVE").is_ok() {
+        // 编译C++模块
+        build_cpp_modules();
+        
+        // 生成FFI绑定
+        generate_bindings();
+    } else {
+        println!("cargo:warning=native feature未启用，跳过C++模块编译");
+    }
     
     // 平台特定配置
     configure_platform();
@@ -31,51 +36,95 @@ fn build_cpp_modules() {
     println!("开始编译C++模块...");
     
     // 数学优化模块
-    cc::Build::new()
-        .cpp(true)
-        .file("cpp/math/simd_operations.cpp")
-        .include("cpp/math")
-        .flag_if_supported("-O3")
-        .flag_if_supported("-mavx2")
-        .flag_if_supported("-mfma")
-        .compile("pokemongo_math");
+    if std::path::Path::new("cpp/math/simd_operations.cpp").exists() {
+        cc::Build::new()
+            .cpp(true)
+            .file("cpp/math/simd_operations.cpp")
+            .include("cpp/math")
+            .flag_if_supported("-O3")
+            .flag_if_supported("-mavx2")
+            .flag_if_supported("-mfma")
+            .compile("pokemongo_math");
+        println!("数学优化模块编译完成");
+    } else {
+        println!("cargo:warning=cpp/math/simd_operations.cpp 不存在，跳过数学模块编译");
+    }
     
     // 图形优化模块
-    cc::Build::new()
-        .cpp(true)
-        .file("cpp/graphics/fast_renderer.cpp")
-        .include("cpp/graphics")
-        .flag_if_supported("-O3")
-        .compile("pokemongo_graphics");
+    if std::path::Path::new("cpp/graphics/fast_renderer.cpp").exists() {
+        cc::Build::new()
+            .cpp(true)
+            .file("cpp/graphics/fast_renderer.cpp")
+            .include("cpp/graphics")
+            .flag_if_supported("-O3")
+            .compile("pokemongo_graphics");
+        println!("图形优化模块编译完成");
+    } else {
+        println!("cargo:warning=cpp/graphics/fast_renderer.cpp 不存在，跳过图形模块编译");
+    }
     
     // 物理碰撞模块
-    cc::Build::new()
-        .cpp(true)
-        .file("cpp/physics/collision.cpp")
-        .include("cpp/physics")
-        .flag_if_supported("-O3")
-        .compile("pokemongo_physics");
+    if std::path::Path::new("cpp/physics/collision.cpp").exists() {
+        cc::Build::new()
+            .cpp(true)
+            .file("cpp/physics/collision.cpp")
+            .include("cpp/physics")
+            .flag_if_supported("-O3")
+            .compile("pokemongo_physics");
+        println!("物理碰撞模块编译完成");
+    } else {
+        println!("cargo:warning=cpp/physics/collision.cpp 不存在，跳过物理模块编译");
+    }
     
-    println!("C++模块编译完成");
+    println!("C++模块编译检查完成");
 }
 
 fn generate_bindings() {
     println!("生成FFI绑定...");
     
-    let bindings = bindgen::Builder::default()
-        .header("cpp/math/simd_operations.h")
-        .header("cpp/graphics/fast_renderer.h")
-        .header("cpp/physics/collision.h")
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        .generate()
-        .expect("无法生成绑定");
+    let mut builder = bindgen::Builder::default()
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()));
     
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("无法写入绑定文件");
+    let mut has_headers = false;
     
-    println!("FFI绑定生成完成");
+    if std::path::Path::new("cpp/math/simd_operations.h").exists() {
+        builder = builder.header("cpp/math/simd_operations.h");
+        has_headers = true;
+        println!("添加数学模块头文件");
+    } else {
+        println!("cargo:warning=cpp/math/simd_operations.h 不存在，跳过");
+    }
+    
+    if std::path::Path::new("cpp/graphics/fast_renderer.h").exists() {
+        builder = builder.header("cpp/graphics/fast_renderer.h");
+        has_headers = true;
+        println!("添加图形模块头文件");
+    } else {
+        println!("cargo:warning=cpp/graphics/fast_renderer.h 不存在，跳过");
+    }
+    
+    if std::path::Path::new("cpp/physics/collision.h").exists() {
+        builder = builder.header("cpp/physics/collision.h");
+        has_headers = true;
+        println!("添加物理模块头文件");
+    } else {
+        println!("cargo:warning=cpp/physics/collision.h 不存在，跳过");
+    }
+    
+    if has_headers {
+        let bindings = builder
+            .generate()
+            .expect("无法生成绑定");
+        
+        let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+        bindings
+            .write_to_file(out_path.join("bindings.rs"))
+            .expect("无法写入绑定文件");
+        
+        println!("FFI绑定生成完成");
+    } else {
+        println!("cargo:warning=没有找到C++头文件，跳过绑定生成");
+    }
 }
 
 fn configure_platform() {
@@ -100,11 +149,16 @@ fn configure_platform() {
 fn configure_windows() {
     println!("配置Windows平台...");
     
-    // Windows特定链接
+    // 基础Windows链接
     println!("cargo:rustc-link-lib=user32");
     println!("cargo:rustc-link-lib=kernel32");
-    println!("cargo:rustc-link-lib=opengl32");
-    println!("cargo:rustc-link-lib=gdi32");
+    
+    // 仅在启用native feature时链接OpenGL
+    if env::var("CARGO_FEATURE_NATIVE").is_ok() {
+        println!("cargo:rustc-link-lib=opengl32");
+        println!("cargo:rustc-link-lib=gdi32");
+        println!("native feature启用，链接OpenGL库");
+    }
     
     // MSVC运行时
     if env::var("CARGO_CFG_TARGET_ENV").unwrap() == "msvc" {
@@ -123,13 +177,17 @@ fn configure_linux() {
     println!("cargo:rustc-link-lib=pthread");
     println!("cargo:rustc-link-lib=m");
     
-    // pkg-config依赖
-    if pkg_config::probe("alsa").is_ok() {
-        println!("cargo:rustc-cfg=feature=\"alsa\"");
-    }
-    
-    if pkg_config::probe("pulseaudio").is_ok() {
-        println!("cargo:rustc-cfg=feature=\"pulseaudio\"");
+    // pkg-config依赖 (仅在启用时检查)
+    if env::var("CARGO_FEATURE_NATIVE").is_ok() {
+        match pkg_config::Config::new().probe("alsa") {
+            Ok(_) => println!("cargo:rustc-cfg=feature=\"alsa\""),
+            Err(_) => println!("cargo:warning=alsa开发包未找到")
+        }
+        
+        match pkg_config::Config::new().probe("pulseaudio") {
+            Ok(_) => println!("cargo:rustc-cfg=feature=\"pulseaudio\""),
+            Err(_) => println!("cargo:warning=pulseaudio开发包未找到")
+        }
     }
     
     println!("Linux平台配置完成");

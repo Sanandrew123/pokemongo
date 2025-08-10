@@ -2,26 +2,86 @@
 // 开发心理：现代游戏需要美观的视觉效果和流畅的性能
 // 设计原则：GPU驱动、批量渲染、资源高效利用、跨平台兼容
 
-pub mod renderer;
+// 逐步实现子模块
+pub mod renderer2d;
 pub mod shader;
 pub mod texture;
-pub mod sprite;
 pub mod camera;
-pub mod ui;
+// pub mod renderer;
+// pub mod sprite;
+// pub mod ui;
 
-// 重新导出主要类型
-pub use renderer::{Renderer, RenderCommand, RenderQueue};
-pub use shader::{Shader, ShaderManager, ShaderProgram, UniformValue};
-pub use texture::{Texture, TextureManager, TextureFormat, TextureFilter};
-pub use sprite::{Sprite, SpriteRenderer, SpriteBatch, SpriteAnimation};
-pub use camera::{Camera, CameraController, Projection};
-pub use ui::{UIRenderer, UIElement, UIManager};
+// 重新导出已实现的类型
+pub use renderer2d::{Renderer2D, RenderLayer, RenderCommand, sprite_rendering_system};
+pub use shader::{ShaderManager, ShaderProgram, UniformValue, ShaderId, ShaderType, builtin_shaders};
+pub use texture::{TextureManager, TextureDesc, TextureFormat, TextureFilter, TextureType, TextureId, TextureData};
+pub use camera::{Camera, CameraController, ProjectionType, CameraType, Ray, Plane};
+// pub use sprite::{Sprite, SpriteRenderer, SpriteBatch, SpriteAnimation};
+// pub use ui::{UIRenderer, UIElement, UIManager};
 
 use crate::core::{GameError, Result};
 use crate::core::resource_manager::{ResourceManager, ResourceHandle};
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use log::{info, debug, warn, error};
+
+// 临时类型定义，避免编译错误  
+pub struct SpriteRenderer;
+pub struct UIRenderer;
+pub struct Shader;
+
+pub trait Renderer {
+    fn clear_color(&mut self, r: f32, g: f32, b: f32, a: f32) -> Result<()> { Ok(()) }
+    fn clear(&mut self) -> Result<()> { Ok(()) }
+    fn present(&mut self) -> Result<()> { Ok(()) }
+    fn viewport(&mut self, x: i32, y: i32, width: u32, height: u32) -> Result<()> { Ok(()) }
+    fn set_vsync(&mut self, vsync: bool) -> Result<()> { Ok(()) }
+    fn read_pixels(&self) -> Result<Vec<u8>> { Ok(vec![]) }
+}
+
+
+impl SpriteRenderer {
+    pub fn new() -> Result<Self> { Ok(Self) }
+    pub fn add_sprite(&mut self, _sprite: Sprite) -> Result<()> { Ok(()) }
+}
+
+impl UIRenderer {
+    pub fn new() -> Result<Self> { Ok(Self) }
+    pub fn render(&mut self, _renderer: &mut dyn Renderer) -> Result<()> { Ok(()) }
+    pub fn add_text(&mut self, _text: &str, _pos: glam::Vec2, _size: f32, _color: glam::Vec4, _layer: RenderLayer) -> Result<()> { Ok(()) }
+}
+
+
+pub struct RenderQueue {
+    pub commands: Vec<RenderCommand>,
+}
+
+impl RenderQueue {
+    pub fn new() -> Self { 
+        Self { commands: Vec::new() }
+    }
+    pub fn clear(&mut self) {
+        self.commands.clear();
+    }
+    pub fn sort(&mut self) {}
+}
+
+#[derive(Debug, Clone)]
+pub enum RenderCommand {
+    DrawMesh { shader_id: u32, texture_id: Option<u32> },
+}
+
+pub struct Sprite {
+    pub texture: ResourceHandle<texture::Texture>,
+    pub position: glam::Vec2,
+    pub size: glam::Vec2,
+    pub rotation: f32,
+    pub color: glam::Vec4,
+    pub layer: RenderLayer,
+    pub uv_rect: glam::Vec4,
+    pub flip_x: bool,
+    pub flip_y: bool,
+}
 
 // 渲染器类型
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -113,9 +173,9 @@ pub struct Vertex3D {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Material {
     pub name: String,
-    pub diffuse_texture: Option<ResourceHandle<Texture>>,
-    pub normal_texture: Option<ResourceHandle<Texture>>,
-    pub specular_texture: Option<ResourceHandle<Texture>>,
+    pub diffuse_texture: Option<ResourceHandle<texture::Texture>>,
+    pub normal_texture: Option<ResourceHandle<texture::Texture>>,
+    pub specular_texture: Option<ResourceHandle<texture::Texture>>,
     pub albedo: [f32; 4],
     pub metallic: f32,
     pub roughness: f32,
@@ -171,8 +231,8 @@ pub enum Light {
 pub struct RenderTarget {
     pub width: u32,
     pub height: u32,
-    pub color_attachments: Vec<Texture>,
-    pub depth_attachment: Option<Texture>,
+    pub color_attachments: Vec<texture::Texture>,
+    pub depth_attachment: Option<texture::Texture>,
     pub samples: u32,
 }
 
@@ -183,13 +243,13 @@ pub struct GraphicsContext {
     
     // 渲染组件
     pub renderer: Box<dyn Renderer>,
-    pub shader_manager: ShaderManager,
-    pub texture_manager: TextureManager,
+    pub shader_manager: shader::ShaderManager,
+    pub texture_manager: texture::TextureManager,
     pub sprite_renderer: SpriteRenderer,
     pub ui_renderer: UIRenderer,
     
     // 场景数据
-    pub camera: Camera,
+    pub camera: camera::Camera,
     pub lights: Vec<Light>,
     pub render_objects: Vec<RenderObject>,
     pub materials: Vec<Material>,
@@ -215,19 +275,18 @@ impl GraphicsContext {
         let renderer = Self::create_renderer(&config)?;
         
         // 初始化管理器
-        let shader_manager = ShaderManager::new();
-        let texture_manager = TextureManager::new();
+        let shader_manager = shader::ShaderManager::new("assets/shaders");
+        let mut texture_manager = texture::TextureManager::new();
+        texture_manager.initialize_default_textures()?;
         let sprite_renderer = SpriteRenderer::new()?;
         let ui_renderer = UIRenderer::new()?;
         
         // 创建默认相机
-        let camera = Camera::new(
-            Projection::Perspective {
-                fovy: 60.0_f32.to_radians(),
-                aspect: config.window_width as f32 / config.window_height as f32,
-                near: 0.1,
-                far: 1000.0,
-            }
+        let camera = camera::Camera::perspective(
+            60.0_f32.to_radians(),
+            config.window_width as f32 / config.window_height as f32,
+            0.1,
+            1000.0
         );
         
         Ok(Self {
@@ -323,7 +382,7 @@ impl GraphicsContext {
     // 渲染精灵
     pub fn render_sprite(
         &mut self,
-        texture: &ResourceHandle<Texture>,
+        texture: &ResourceHandle<texture::Texture>,
         position: glam::Vec2,
         size: glam::Vec2,
         rotation: f32,
@@ -364,7 +423,7 @@ impl GraphicsContext {
     }
     
     // 设置相机
-    pub fn set_camera(&mut self, camera: Camera) {
+    pub fn set_camera(&mut self, camera: camera::Camera) {
         self.camera = camera;
     }
     
@@ -501,9 +560,7 @@ impl GraphicsContext {
         self.config.window_height = height;
         
         // 更新相机宽高比
-        if let Projection::Perspective { ref mut aspect, .. } = self.camera.projection {
-            *aspect = width as f32 / height as f32;
-        }
+        self.camera.set_aspect_ratio(width as f32 / height as f32);
         
         // 重新创建帧缓冲
         if let Some(ref mut framebuffer) = self.main_framebuffer {

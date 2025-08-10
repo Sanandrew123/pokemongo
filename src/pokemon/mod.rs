@@ -2,27 +2,146 @@
 // 开发心理：宝可梦是游戏的灵魂，需要完整的数据模型和行为系统
 // 设计原则：数据驱动、可扩展的种族系统、灵活的个体差异
 
+// 逐步实现子模块
 pub mod species;
-pub mod stats;
-pub mod types;
 pub mod moves;
-pub mod abilities;
-pub mod evolution;
-pub mod ai;
+// pub mod stats;
+// pub mod types;
+// pub mod abilities;
+// pub mod evolution;
+// pub mod ai;
 
-// 重新导出主要类型
-pub use species::{PokemonSpecies, SpeciesId};
-pub use stats::{BaseStats, IndividualValues, EffortValues, PokemonStats};
-pub use types::{PokemonType, TypeEffectiveness};
-pub use moves::{Move, MoveId, MoveCategory, MoveTarget};
-pub use abilities::{Ability, AbilityId, AbilityEffect};
-pub use evolution::{EvolutionChain, EvolutionTrigger, EvolutionCondition};
-pub use ai::{PokemonAI, AIBehavior, AIPersonality};
+// 重新导出已实现的类型
+pub use species::{PokemonSpecies, PokemonType};
+pub use moves::{Move, MoveId, MoveCategory, MoveTarget, LearnMethod, LearnableMove};
+// pub use stats::{BaseStats, IndividualValues, EffortValues, PokemonStats};
+// pub use types::{PokemonType, TypeEffectiveness};
+// pub use moves::{Move, MoveId, MoveCategory, MoveTarget};
+// pub use abilities::{Ability, AbilityId, AbilityEffect};
+// pub use evolution::{EvolutionChain, EvolutionTrigger, EvolutionCondition};
+// pub use ai::{PokemonAI, AIBehavior, AIPersonality};
 
 use crate::core::{GameError, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use log::{info, debug};
+
+// 临时类型定义，避免编译错误
+pub type SpeciesId = u16;
+// MoveId已在moves模块中定义
+pub type AbilityId = u16;
+
+// 临时结构体定义
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BaseStats {
+    pub hp: u16,
+    pub attack: u16,
+    pub defense: u16,
+    pub special_attack: u16,
+    pub special_defense: u16,
+    pub speed: u16,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IndividualValues {
+    pub hp: u8,
+    pub attack: u8,
+    pub defense: u8,
+    pub special_attack: u8,
+    pub special_defense: u8,
+    pub speed: u8,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EffortValues {
+    pub hp: u8,
+    pub attack: u8,
+    pub defense: u8,
+    pub special_attack: u8,
+    pub special_defense: u8,
+    pub speed: u8,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PokemonStats {
+    pub hp: u16,
+    pub attack: u16,
+    pub defense: u16,
+    pub special_attack: u16,
+    pub special_defense: u16,
+    pub speed: u16,
+}
+
+// PokemonSpecies已在species.rs中定义，这里不需要重复定义
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Move {
+    pub name: String,
+    pub pp: u8,
+    pub secondary_effect: Option<crate::battle::SecondaryEffect>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EvolutionChain;
+
+impl Default for EffortValues {
+    fn default() -> Self {
+        Self {
+            hp: 0,
+            attack: 0,
+            defense: 0,
+            special_attack: 0,
+            special_defense: 0,
+            speed: 0,
+        }
+    }
+}
+
+impl IndividualValues {
+    pub fn random() -> Self {
+        Self {
+            hp: fastrand::u8(0..32),
+            attack: fastrand::u8(0..32),
+            defense: fastrand::u8(0..32),
+            special_attack: fastrand::u8(0..32),
+            special_defense: fastrand::u8(0..32),
+            speed: fastrand::u8(0..32),
+        }
+    }
+}
+
+impl PokemonStats {
+    pub fn calculate(
+        _base: &BaseStats,
+        _iv: &IndividualValues,
+        _ev: &EffortValues,
+        _level: u8,
+        _nature: Nature,
+    ) -> Self {
+        Self {
+            hp: 100,
+            attack: 100,
+            defense: 100,
+            special_attack: 100,
+            special_defense: 100,
+            speed: 100,
+        }
+    }
+}
+
+// PokemonSpecies的方法在species.rs中实现
+
+impl Move {
+    pub fn get(_id: MoveId) -> Option<&'static Self> {
+        None
+    }
+}
+
+impl EvolutionChain {
+    pub fn check_conditions(&self, _pokemon: &Pokemon) -> bool {
+        false
+    }
+}
 
 // 宝可梦个体
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -136,7 +255,7 @@ impl Pokemon {
         original_trainer: String,
         caught_location: String,
     ) -> Result<Self> {
-        let species = PokemonSpecies::get(species_id)
+        let species = crate::pokemon::species::get_species(species_id)
             .ok_or_else(|| GameError::PokemonError("无效的宝可梦种族ID".to_string()))?;
         
         // 生成随机个体值
@@ -216,8 +335,8 @@ impl Pokemon {
     }
     
     // 获取种族信息
-    pub fn get_species(&self) -> Result<&PokemonSpecies> {
-        PokemonSpecies::get(self.species_id)
+    pub fn get_species(&self) -> Result<&'static PokemonSpecies> {
+        crate::pokemon::species::get_species(self.species_id)
             .ok_or_else(|| GameError::PokemonError("宝可梦种族数据丢失".to_string()))
     }
     

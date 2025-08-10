@@ -2,16 +2,17 @@
 // 开发心理：现代游戏必须支持联机功能，需要低延迟、高并发、安全可靠的网络架构
 // 设计原则：异步IO、消息队列、状态同步、反作弊机制
 
-pub mod client;
-pub mod server;
-pub mod protocol;
-pub mod matchmaking;
+// 暂时注释掉未实现的子模块，避免编译错误
+// pub mod client;
+// pub mod server;
+// pub mod protocol;
+// pub mod matchmaking;
 
-// 重新导出主要类型
-pub use client::{NetworkClient, ClientState, ConnectionStatus};
-pub use server::{NetworkServer, ServerConfig, SessionManager};
-pub use protocol::{Message, PacketType, MessageHandler, Serializable};
-pub use matchmaking::{MatchmakingService, MatchRequest, GameRoom};
+// 重新导出主要类型 - 待模块实现后再启用
+// pub use client::{NetworkClient, ClientState, ConnectionStatus};
+// pub use server::{NetworkServer, ServerConfig, SessionManager};
+// pub use protocol::{Message, PacketType, MessageHandler, Serializable};
+// pub use matchmaking::{MatchmakingService, MatchRequest, GameRoom};
 
 use crate::core::{GameError, Result};
 use crate::core::event_system::{Event, EventSystem, EventPriority};
@@ -20,6 +21,86 @@ use std::collections::HashMap;
 use std::net::{IpAddr, SocketAddr};
 use std::time::{Duration, Instant, SystemTime};
 use log::{info, debug, warn, error};
+
+// 临时类型定义，避免编译错误
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum PacketType {
+    Heartbeat,
+    Message,
+    Connect,
+    Disconnect,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ConnectionStatus {
+    Disconnected,
+    Connecting,
+    Connected,
+    Disconnecting,
+}
+
+pub trait Message {
+    fn packet_type() -> PacketType;
+    fn serialize(&self) -> Result<Vec<u8>>;
+}
+
+pub trait MessageHandler {
+    fn handle_message(&self, connection_id: u64, data: &[u8]) -> Result<()>;
+}
+
+// 临时结构体定义
+pub struct NetworkClient;
+pub struct NetworkServer;
+
+impl NetworkClient {
+    pub fn new(_config: NetworkConfig) -> Result<Self> {
+        Ok(Self)
+    }
+    
+    pub fn connect(&mut self, _address: &str, _port: u16) -> Result<()> {
+        Ok(())
+    }
+    
+    pub fn disconnect(&mut self, _reason: DisconnectReason) -> Result<()> {
+        Ok(())
+    }
+    
+    pub fn update(&mut self, _delta_time: Duration) -> Result<()> {
+        Ok(())
+    }
+    
+    pub fn send(&mut self, _data: &[u8], _method: DeliveryMethod) -> Result<()> {
+        Ok(())
+    }
+    
+    pub fn get_status(&self) -> ConnectionStatus {
+        ConnectionStatus::Disconnected
+    }
+}
+
+impl NetworkServer {
+    pub fn new(_config: NetworkConfig) -> Result<Self> {
+        Ok(Self)
+    }
+    
+    pub fn update(&mut self, _delta_time: Duration) -> Result<()> {
+        Ok(())
+    }
+    
+    pub fn send_to_client(&mut self, _connection_id: u64, _data: &[u8], _method: DeliveryMethod) -> Result<()> {
+        Ok(())
+    }
+    
+    pub fn kick_client(&mut self, _connection_id: u64, _reason: &str) -> Result<()> {
+        Ok(())
+    }
+    
+    pub fn ban_address(&mut self, _addr: IpAddr, _duration: Duration, _reason: &str) -> Result<()> {
+        Ok(())
+    }
+    
+    pub fn shutdown(&mut self) {}
+}
 
 // 网络配置
 #[derive(Debug, Clone, Serialize, Deserialize)]

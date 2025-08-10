@@ -704,8 +704,9 @@ macro_rules! game_warn {
     ($($arg:tt)*) => { game_log!(LogLevel::Warn, module_path!(), $($arg)*) };
 }
 
+// 注意：game_error宏已在core/error.rs中定义，这里重命名为game_error_log避免冲突
 #[macro_export]
-macro_rules! game_error {
+macro_rules! game_error_log {
     ($target:expr, $($arg:tt)*) => { game_log!(LogLevel::Error, $target, $($arg)*) };
     ($($arg:tt)*) => { game_log!(LogLevel::Error, module_path!(), $($arg)*) };
 }

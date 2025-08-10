@@ -3,9 +3,10 @@
 // 设计原则：模块化、高效、易用、跨平台
 
 pub mod logger;
-pub mod math;
-pub mod random;
-pub mod timer;
+// 暂时注释掉未实现的子模块，避免编译错误
+// pub mod math;
+// pub mod random;
+// pub mod timer;
 
 use crate::core::{GameError, Result};
 use serde::{Deserialize, Serialize};
@@ -14,10 +15,48 @@ use std::hash::{Hash, Hasher};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use log::{info, debug, warn, error};
 
+// 颜色结构体
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct Color {
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
+    pub a: f32,
+}
+
+impl Default for Color {
+    fn default() -> Self {
+        Self {
+            r: 1.0,
+            g: 1.0,
+            b: 1.0,
+            a: 1.0,
+        }
+    }
+}
+
+impl Color {
+    pub fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
+        Self { r, g, b, a }
+    }
+    
+    pub fn rgb(r: f32, g: f32, b: f32) -> Self {
+        Self { r, g, b, a: 1.0 }
+    }
+    
+    pub const WHITE: Self = Self { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
+    pub const BLACK: Self = Self { r: 0.0, g: 0.0, b: 0.0, a: 1.0 };
+    pub const RED: Self = Self { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
+    pub const GREEN: Self = Self { r: 0.0, g: 1.0, b: 0.0, a: 1.0 };
+    pub const BLUE: Self = Self { r: 0.0, g: 0.0, b: 1.0, a: 1.0 };
+    pub const TRANSPARENT: Self = Self { r: 0.0, g: 0.0, b: 0.0, a: 0.0 };
+}
+
 pub use logger::*;
-pub use math::*;
-pub use random::*;
-pub use timer::*;
+// 暂时注释掉未实现的模块导出
+// pub use math::*;
+// pub use random::*;
+// pub use timer::*;
 
 // 版本信息结构
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -448,7 +487,7 @@ impl SystemInfo {
         Self {
             os: std::env::consts::OS.to_string(),
             arch: std::env::consts::ARCH.to_string(),
-            cpu_count: num_cpus::get(),
+            cpu_count: num_cpus(),
             memory_total: Self::get_total_memory(),
             memory_available: Self::get_available_memory(),
             username: std::env::var("USERNAME").or_else(|_| std::env::var("USER")).ok(),
@@ -630,14 +669,7 @@ fn num_cpus() -> usize {
         .unwrap_or(1)
 }
 
-// 颜色工具
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Color {
-    pub r: f32,
-    pub g: f32,
-    pub b: f32,
-    pub a: f32,
-}
+// 重复的Color定义已删除
 
 impl Color {
     pub const WHITE: Color = Color { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };

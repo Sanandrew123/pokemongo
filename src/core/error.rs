@@ -30,6 +30,23 @@ pub enum GameError {
     BattleError(String),
     PokemonError(String),
     SaveError(String),
+    PlayerError(String),
+    UIError(String),
+    AssetError(String),
+    GameModeError(String),
+    
+    // 新增错误类型
+    Data(String),
+    Database(String),
+    ECS(String),
+    World(String),
+    Progress(String),
+    NPC(String),
+    Map(String),
+    Network(String),
+    
+    // 泛型错误
+    GenericError(String),
     
     // I/O错误
     FileError(String),
@@ -61,6 +78,21 @@ impl fmt::Display for GameError {
             GameError::BattleError(msg) => write!(f, "战斗错误: {}", msg),
             GameError::PokemonError(msg) => write!(f, "宝可梦错误: {}", msg),
             GameError::SaveError(msg) => write!(f, "存档错误: {}", msg),
+            GameError::PlayerError(msg) => write!(f, "玩家错误: {}", msg),
+            GameError::UIError(msg) => write!(f, "UI错误: {}", msg),
+            GameError::AssetError(msg) => write!(f, "资源错误: {}", msg),
+            GameError::GameModeError(msg) => write!(f, "游戏模式错误: {}", msg),
+            
+            GameError::Data(msg) => write!(f, "数据错误: {}", msg),
+            GameError::Database(msg) => write!(f, "数据库错误: {}", msg),
+            GameError::ECS(msg) => write!(f, "ECS错误: {}", msg),
+            GameError::World(msg) => write!(f, "世界错误: {}", msg),
+            GameError::Progress(msg) => write!(f, "进度错误: {}", msg),
+            GameError::NPC(msg) => write!(f, "NPC错误: {}", msg),
+            GameError::Map(msg) => write!(f, "地图错误: {}", msg),
+            GameError::Network(msg) => write!(f, "网络错误: {}", msg),
+            
+            GameError::GenericError(msg) => write!(f, "错误: {}", msg),
             
             GameError::FileError(msg) => write!(f, "文件错误: {}", msg),
             GameError::ParseError(msg) => write!(f, "解析错误: {}", msg),
