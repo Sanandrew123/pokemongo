@@ -50,13 +50,15 @@ mod ffi;
 #[cfg(feature = "custom-engine")]
 mod engine;
 
+#[cfg(feature = "custom-engine")]
 use crate::core::app::PokemonApp;
-use crate::states::{GameState, loading::LoadingPlugin, menu::MenuPlugin};
-use crate::graphics::renderer::PokemonRendererPlugin;
-use crate::input::PokemonInputPlugin;
-use crate::audio::PokemonAudioPlugin;
-use crate::data::PokemonDataPlugin;
-use crate::player::PokemonPlayerPlugin;
+use crate::states::{loading::LoadingPlugin, menu::MenuPlugin};
+// 注意：以下插件需要实现后再启用
+// use crate::graphics::renderer::PokemonRendererPlugin;
+// use crate::input::PokemonInputPlugin;
+// use crate::audio::PokemonAudioPlugin;
+// use crate::data::PokemonDataPlugin;
+// use crate::player::PokemonPlayerPlugin;
 
 #[cfg(feature = "pokemon-wip")]
 use crate::pokemon::PokemonSystemPlugin;
@@ -64,8 +66,8 @@ use crate::pokemon::PokemonSystemPlugin;
 #[cfg(feature = "battle-wip")]
 use crate::battle::PokemonBattlePlugin;
 
-use crate::world::PokemonWorldPlugin;
-use crate::ui::PokemonUIPlugin;
+// use crate::world::PokemonWorldPlugin;
+// use crate::ui::PokemonUIPlugin;
 
 #[cfg(feature = "network-wip")]
 use crate::network::PokemonNetworkPlugin;
@@ -100,20 +102,23 @@ fn main() {
     ));
 
     // 游戏状态管理
-    app.init_state::<GameState>()
-        .enable_state_scoped_entities::<GameState>();
+    app.init_state::<states::GameState>()
+        .enable_state_scoped_entities::<states::GameState>();
 
     // 核心游戏插件
-    app.add_plugins(PokemonApp)
-        .add_plugins(LoadingPlugin)
-        .add_plugins(MenuPlugin)
-        .add_plugins(PokemonRendererPlugin)
-        .add_plugins(PokemonInputPlugin)
-        .add_plugins(PokemonAudioPlugin)
-        .add_plugins(PokemonDataPlugin)
-        .add_plugins(PokemonPlayerPlugin)
-        .add_plugins(PokemonWorldPlugin)
-        .add_plugins(PokemonUIPlugin);
+    #[cfg(feature = "custom-engine")]
+    app.add_plugins(PokemonApp);
+    
+    app.add_plugins(LoadingPlugin)
+        .add_plugins(MenuPlugin);
+        // 注意：以下插件需要实现后再启用
+        // .add_plugins(PokemonRendererPlugin)
+        // .add_plugins(PokemonInputPlugin)
+        // .add_plugins(PokemonAudioPlugin)
+        // .add_plugins(PokemonDataPlugin)
+        // .add_plugins(PokemonPlayerPlugin)
+        // .add_plugins(PokemonWorldPlugin)
+        // .add_plugins(PokemonUIPlugin);
 
     // 条件编译的模块插件
     #[cfg(feature = "pokemon-wip")]
@@ -139,7 +144,7 @@ fn main() {
 
 fn setup_game(
     mut commands: Commands,
-    mut next_state: ResMut<NextState<GameState>>,
+    mut next_state: ResMut<NextState<states::GameState>>,
 ) {
     tracing::info!("设置游戏初始状态");
     
@@ -151,7 +156,7 @@ fn setup_game(
     commands.insert_resource(crate::ecs::ECSWorld::new());
     
     // 启动加载状态
-    next_state.set(GameState::Loading);
+    next_state.set(states::GameState::Loading);
     
     tracing::info!("游戏初始状态设置完成");
 }
@@ -208,10 +213,10 @@ mod tests {
     #[test]
     fn test_game_state_initialization() {
         let mut app = App::new();
-        app.init_state::<GameState>();
+        app.init_state::<states::GameState>();
         
-        let current_state = app.world().resource::<State<GameState>>();
-        assert_eq!(**current_state, GameState::Loading);
+        let current_state = app.world().resource::<State<states::GameState>>();
+        assert_eq!(**current_state, states::GameState::Loading);
     }
 
     #[test]

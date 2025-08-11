@@ -4,7 +4,7 @@
 
 use log::{debug, warn, error};
 use crate::core::error::GameError;
-use crate::graphics::renderer::Renderer2D;
+use crate::graphics::Renderer2D;
 use crate::graphics::ui::{UIManager, ElementType};
 use crate::input::mouse::MouseEvent;
 use crate::input::gamepad::GamepadEvent;

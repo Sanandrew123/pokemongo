@@ -47,28 +47,12 @@ impl SpriteRenderer {
 impl UIRenderer {
     pub fn new() -> Result<Self> { Ok(Self) }
     pub fn render(&mut self, _renderer: &mut dyn Renderer) -> Result<()> { Ok(()) }
-    pub fn add_text(&mut self, _text: &str, _pos: glam::Vec2, _size: f32, _color: glam::Vec4, _layer: RenderLayer) -> Result<()> { Ok(()) }
+    pub fn add_text(&mut self, _text: &str, _pos: glam::Vec2, _size: f32, _color: glam::Vec4, _layer: renderer2d::RenderLayer) -> Result<()> { Ok(()) }
 }
 
 
-pub struct RenderQueue {
-    pub commands: Vec<RenderCommand>,
-}
-
-impl RenderQueue {
-    pub fn new() -> Self { 
-        Self { commands: Vec::new() }
-    }
-    pub fn clear(&mut self) {
-        self.commands.clear();
-    }
-    pub fn sort(&mut self) {}
-}
-
-#[derive(Debug, Clone)]
-pub enum RenderCommand {
-    DrawMesh { shader_id: u32, texture_id: Option<u32> },
-}
+// RenderQueue 和 RenderCommand 在 renderer2d.rs 中定义，这里不重复定义
+pub use renderer2d::{RenderQueue};
 
 pub struct Sprite {
     pub texture: ResourceHandle<texture::Texture>,
@@ -76,7 +60,7 @@ pub struct Sprite {
     pub size: glam::Vec2,
     pub rotation: f32,
     pub color: glam::Vec4,
-    pub layer: RenderLayer,
+    pub layer: renderer2d::RenderLayer,
     pub uv_rect: glam::Vec4,
     pub flip_x: bool,
     pub flip_y: bool,
@@ -138,17 +122,7 @@ pub struct RenderStats {
     pub frame_time_ms: f64,
 }
 
-// 渲染层级
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum RenderLayer {
-    Background = 0,
-    Terrain = 100,
-    Objects = 200,
-    Characters = 300,
-    Effects = 400,
-    UI = 500,
-    Debug = 1000,
-}
+// RenderLayer 在 renderer2d.rs 中定义，这里不重复定义
 
 // 顶点格式定义
 #[repr(C)]
@@ -195,7 +169,7 @@ pub struct Mesh {
 pub struct RenderObject {
     pub mesh: Mesh,
     pub transform: glam::Mat4,
-    pub layer: RenderLayer,
+    pub layer: renderer2d::RenderLayer,
     pub visible: bool,
     pub cast_shadow: bool,
     pub receive_shadow: bool,
@@ -386,7 +360,7 @@ impl GraphicsContext {
         size: glam::Vec2,
         rotation: f32,
         color: glam::Vec4,
-        layer: RenderLayer,
+        layer: renderer2d::RenderLayer,
     ) -> Result<()> {
         self.sprite_renderer.add_sprite(Sprite {
             texture: texture.clone(),
@@ -410,7 +384,7 @@ impl GraphicsContext {
         position: glam::Vec2,
         font_size: f32,
         color: glam::Vec4,
-        layer: RenderLayer,
+        layer: renderer2d::RenderLayer,
     ) -> Result<()> {
         self.ui_renderer.add_text(text, position, font_size, color, layer)?;
         Ok(())

@@ -6,17 +6,36 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use log::{debug, warn, error};
 use crate::core::error::GameError;
-use crate::graphics::renderer::Renderer2D;
+use crate::graphics::Renderer2D;
 use crate::graphics::ui::UIManager;
 use crate::input::mouse::MouseEvent;
 use crate::input::gamepad::GamepadEvent;
 use glam::Vec2;
+
+// Bevy States枚举 - 用于Bevy状态管理
+use bevy::prelude::*;
 
 pub mod menu;
 pub mod battle;
 pub mod overworld;
 pub mod settings;
 pub mod loading;
+
+// Bevy States枚举 - 符合Bevy状态管理要求
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
+pub enum GameState {
+    #[default]
+    Loading,        // 加载状态（默认）
+    MainMenu,       // 主菜单
+    GameMenu,       // 游戏内菜单
+    Overworld,      // 大地图
+    Battle,         // 战斗
+    Inventory,      // 背包
+    Pokemon,        // Pokemon管理
+    Settings,       // 设置
+    Pause,          // 暂停
+    Credits,        // 制作人员
+}
 
 // 状态ID类型
 pub type StateId = u32;

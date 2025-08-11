@@ -21,14 +21,17 @@
 ## 🚀 快速开始
 
 ```bash
-# 运行演示程序
-cargo run --bin demo --no-default-features
+# 运行游戏程序
+cargo run --bin pokemongo
+
+# 或者直接运行
+cargo run
 
 # 编译检查
-cargo check --no-default-features
+cargo check
 
 # 运行测试
-cargo test --no-default-features
+cargo test
 ```
 
 ## 📊 项目状态
