@@ -4,11 +4,11 @@
 
 use log::{debug, warn, error};
 use crate::core::error::GameError;
-use crate::graphics::Renderer2D;
-use crate::graphics::ui::{UIManager, ElementType, UIEvent};
+use crate::ui::{UIManager, ElementType, UIEvent};
+use super::Renderer2D;
 use crate::input::mouse::MouseEvent;
 use crate::input::gamepad::GamepadEvent;
-use super::{GameState, GameStateType, StateTransition};
+use super::{StateHandler, GameStateType, StateTransition};
 use glam::{Vec2, Vec4};
 
 // 菜单项
@@ -220,7 +220,7 @@ impl MainMenuState {
     }
 }
 
-impl GameState for MainMenuState {
+impl StateHandler for MainMenuState {
     fn get_type(&self) -> GameStateType {
         GameStateType::MainMenu
     }
@@ -270,20 +270,15 @@ impl GameState for MainMenuState {
     
     fn render(&mut self, renderer: &mut Renderer2D) -> Result<(), GameError> {
         // 清屏
-        renderer.clear(self.background_color)?;
+        renderer.clear();
         
         // 渲染背景 (如果有)
         if let Some(bg_id) = self.background_image_id {
             renderer.draw_sprite(
                 self.background_parallax,
                 Vec2::new(800.0, 600.0),
-                bg_id,
-                None,
-                Vec4::new(1.0, 1.0, 1.0, 0.3),
-                0.0,
-                false,
-                false,
-            )?;
+                [1.0, 1.0, 1.0, 0.3],
+            );
         }
         
         // 渲染UI
@@ -296,21 +291,19 @@ impl GameState for MainMenuState {
             
             // 标题阴影效果
             renderer.draw_text(
-                "Pokemon GO",
+                "Pokemon GO".to_string(),
                 Vec2::new(402.0, 152.0),
                 48.0 * pulse_scale,
-                Vec4::new(0.0, 0.0, 0.0, 0.5),
-                1,
-            )?;
+                [0.0, 0.0, 0.0, 0.5],
+            );
             
             // 主标题
             renderer.draw_text(
-                "Pokemon GO",
+                "Pokemon GO".to_string(),
                 Vec2::new(400.0, 150.0),
                 48.0 * pulse_scale,
-                title_color,
-                1,
-            )?;
+                [title_color.x, title_color.y, title_color.z, title_color.w],
+            );
         }
         
         Ok(())

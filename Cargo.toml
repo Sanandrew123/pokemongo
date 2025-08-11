@@ -60,6 +60,11 @@ quick-xml = { version = "0.31", features = ["serialize"] }
 glam = { version = "0.27", features = ["serde"] }
 rand = "0.8"
 fastrand = "2.0"
+rand_chacha = "0.3"
+petgraph = "0.6"
+nalgebra = "0.32"
+notify = "6.1"
+regex = "1.10"
 
 # 网络 - 异步高性能网络
 tokio = { version = "1.0", features = ["full"], optional = true }

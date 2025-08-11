@@ -834,6 +834,61 @@ pub struct MusicStats {
     pub active_players: usize,
 }
 
+// 播放列表管理器 - 简化版本
+#[derive(Debug, Clone)]
+pub struct PlaylistManager {
+    playlists: HashMap<String, Vec<String>>,
+    current_playlist: Option<String>,
+    shuffle_enabled: bool,
+    repeat_mode: RepeatMode,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum RepeatMode {
+    Off,
+    Track,
+    Playlist,
+}
+
+impl PlaylistManager {
+    pub fn new() -> Self {
+        Self {
+            playlists: HashMap::new(),
+            current_playlist: None,
+            shuffle_enabled: false,
+            repeat_mode: RepeatMode::Off,
+        }
+    }
+
+    pub fn create_playlist(&mut self, name: String, tracks: Vec<String>) {
+        self.playlists.insert(name, tracks);
+    }
+
+    pub fn get_playlist(&self, name: &str) -> Option<&Vec<String>> {
+        self.playlists.get(name)
+    }
+
+    pub fn set_current_playlist(&mut self, name: String) {
+        self.current_playlist = Some(name);
+    }
+
+    pub fn get_current_playlist(&self) -> Option<&String> {
+        self.current_playlist.as_ref()
+    }
+
+    pub fn update(&mut self, _delta_time: Duration) {
+        // 播放列表更新逻辑
+    }
+
+    pub fn set_shuffle(&mut self, enabled: bool) {
+        self.shuffle_enabled = enabled;
+    }
+
+    pub fn set_repeat_mode(&mut self, mode: RepeatMode) {
+        self.repeat_mode = mode;
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

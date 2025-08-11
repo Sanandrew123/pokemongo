@@ -131,8 +131,7 @@ impl fmt::Display for GameError {
 
 impl StdError for GameError {}
 
-// 便捷的Result类型别名
-pub type Result<T> = std::result::Result<T, GameError>;
+// 便捷的Result类型别名已在上面定义
 
 // 错误转换实现
 impl From<io::Error> for GameError {

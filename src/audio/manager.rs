@@ -3,8 +3,16 @@
 // 设计原则：设备枚举、音频流管理、延迟优化、错误恢复
 
 use crate::core::{GameError, Result};
-use crate::audio::{AudioSystemConfig, AudioChannels, AudioBitDepth, ThreadPriority, DeliveryMethod};
+use crate::audio::{AudioSystemConfig, AudioChannels, AudioBitDepth, ThreadPriority};
 use serde::{Deserialize, Serialize};
+
+// 音频传输方式
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum DeliveryMethod {
+    Reliable,    // 可靠传输
+    Unreliable,  // 不可靠传输（适用于实时音频）
+    Streaming,   // 流式传输
+}
 use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, Mutex, RwLock};
 use std::thread::{self, JoinHandle};

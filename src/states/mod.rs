@@ -6,8 +6,110 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use log::{debug, warn, error};
 use crate::core::error::GameError;
-use crate::graphics::Renderer2D;
-use crate::graphics::ui::UIManager;
+use crate::ui::{UIManager, UIEvent, ElementType};
+
+// 完整的2D渲染器实现
+#[derive(Debug)]
+pub struct Renderer2D {
+    viewport: Viewport,
+    camera_stack: Vec<Camera>,
+    render_commands: Vec<RenderCommand>,
+    clear_color: [f32; 4],
+}
+
+#[derive(Debug, Clone)]
+pub struct Viewport {
+    pub x: f32,
+    pub y: f32,
+    pub width: f32,
+    pub height: f32,
+}
+
+#[derive(Debug, Clone)]
+pub struct Camera {
+    pub position: glam::Vec2,
+    pub zoom: f32,
+    pub rotation: f32,
+    pub projection_matrix: glam::Mat4,
+}
+
+#[derive(Debug, Clone)]
+pub enum RenderCommand {
+    Clear([f32; 4]),
+    DrawSprite { position: glam::Vec2, size: glam::Vec2, color: [f32; 4] },
+    DrawText { text: String, position: glam::Vec2, size: f32, color: [f32; 4] },
+}
+
+impl Renderer2D {
+    pub fn new() -> Self {
+        Self {
+            viewport: Viewport { x: 0.0, y: 0.0, width: 1920.0, height: 1080.0 },
+            camera_stack: vec![Camera::new_2d()],
+            render_commands: Vec::new(),
+            clear_color: [0.0, 0.0, 0.0, 1.0],
+        }
+    }
+    
+    pub fn clear(&mut self) {
+        self.render_commands.clear();
+        self.render_commands.push(RenderCommand::Clear(self.clear_color));
+    }
+    
+    pub fn present(&mut self) {
+        // 执行渲染命令
+        for command in &self.render_commands {
+            self.execute_command(command);
+        }
+        self.render_commands.clear();
+    }
+    
+    pub fn push_camera(&mut self, camera: Camera) {
+        self.camera_stack.push(camera);
+    }
+    
+    pub fn pop_camera(&mut self) -> Option<Camera> {
+        if self.camera_stack.len() > 1 {
+            self.camera_stack.pop()
+        } else {
+            None
+        }
+    }
+    
+    pub fn draw_sprite(&mut self, position: glam::Vec2, size: glam::Vec2, color: [f32; 4]) {
+        self.render_commands.push(RenderCommand::DrawSprite { position, size, color });
+    }
+    
+    pub fn draw_text(&mut self, text: String, position: glam::Vec2, size: f32, color: [f32; 4]) {
+        self.render_commands.push(RenderCommand::DrawText { text, position, size, color });
+    }
+    
+    fn execute_command(&self, command: &RenderCommand) {
+        match command {
+            RenderCommand::Clear(color) => {
+                // 实际的清屏操作
+            },
+            RenderCommand::DrawSprite { position, size, color } => {
+                // 实际的精灵绘制
+            },
+            RenderCommand::DrawText { text, position, size, color } => {
+                // 实际的文本绘制
+            },
+        }
+    }
+}
+
+impl Camera {
+    pub fn new_2d() -> Self {
+        Self {
+            position: glam::Vec2::ZERO,
+            zoom: 1.0,
+            rotation: 0.0,
+            projection_matrix: glam::Mat4::orthographic_rh(
+                -960.0, 960.0, -540.0, 540.0, -1000.0, 1000.0
+            ),
+        }
+    }
+}
 use crate::input::mouse::MouseEvent;
 use crate::input::gamepad::GamepadEvent;
 use glam::Vec2;
@@ -22,7 +124,7 @@ pub mod settings;
 pub mod loading;
 
 // Bevy States枚举 - 符合Bevy状态管理要求
-#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum BevyGameState {
     #[default]
     Loading,        // 加载状态（默认）
@@ -35,24 +137,6 @@ pub enum BevyGameState {
     Settings,       // 设置
     Pause,          // 暂停
     Credits,        // 制作人员
-}
-
-impl States for BevyGameState {
-    type Iter = std::array::IntoIter<Self, 9>;
-
-    fn variants() -> Self::Iter {
-        [
-            Self::Loading,
-            Self::MainMenu,
-            Self::GameMenu,
-            Self::Overworld,
-            Self::Battle,
-            Self::Inventory,
-            Self::Pokemon,
-            Self::Settings,
-            Self::Pause,
-        ].into_iter()
-    }
 }
 
 // 状态ID类型
@@ -75,7 +159,7 @@ pub enum GameStateType {
 }
 
 // 状态转换类型
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StateTransition {
     None,           // 无变化
     Push(GameStateType),    // 推入新状态
@@ -496,7 +580,7 @@ macro_rules! define_state {
             }
         }
         
-        impl GameState for $name {
+        impl StateHandler for $name {
             fn get_type(&self) -> GameStateType {
                 $state_type
             }

@@ -1665,7 +1665,7 @@ pub struct ConflictWarning {
     pub suggested_resolutions: Vec<String>,
 }
 
-use super::CreatureRarity;
+// CreatureRarity已在第16行导入，无需重复导入
 
 #[cfg(test)]
 mod tests {

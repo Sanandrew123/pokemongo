@@ -7,9 +7,9 @@ pub mod sound;
 pub mod music;
 
 // 重新导出主要类型
-pub use manager::{AudioManager, AudioConfig, AudioDevice};
-pub use sound::{Sound, SoundInstance, SoundBuffer, SoundEffect};
-pub use music::{Music, MusicTrack, PlaylistManager};
+pub use manager::{AudioManager, AudioDevice, DeviceStats, DeliveryMethod};
+pub use sound::{SoundBuffer, SoundInstance, SampleFormat, ChannelLayout, SoundEffect, SoundEffectType};
+pub use music::{MusicTrack, MusicCategory, MoodTag, GameContext, PlaylistManager};
 
 use crate::core::{GameError, Result};
 use crate::core::resource_manager::{ResourceManager, ResourceHandle};

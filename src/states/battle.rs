@@ -4,17 +4,123 @@
 
 use log::{debug, warn, error};
 use crate::core::error::GameError;
-use crate::graphics::Renderer2D;
-use crate::graphics::ui::{UIManager, ElementType};
+use crate::ui::{UIManager, ElementType};
+use super::Renderer2D;
 use crate::input::mouse::MouseEvent;
 use crate::input::gamepad::GamepadEvent;
-use crate::pokemon::stats::PokemonStats;
-use crate::pokemon::types::{PokemonType, DualType};
-use crate::battle::animation::BattleAnimationManager;
-use crate::battle::status_effects::StatusEffectManager;
-use super::{GameState, GameStateType, StateTransition};
+// Pokemon相关类型暂时注释掉，等待pokemon模块启用
+// use crate::pokemon::stats::PokemonStats;
+// use crate::pokemon::types::{PokemonType, DualType};
+// use crate::battle::animation::BattleAnimationManager;
+// use crate::battle::status_effects::StatusEffectManager;
+
+// 临时类型定义
+#[derive(Debug, Clone, Copy)]
+pub enum PokemonType { Normal, Fire, Water, Electric, Grass, Ice, Fighting, Poison, Ground, Flying, Psychic, Bug, Rock, Ghost, Dragon, Dark, Steel, Fairy }
+
+#[derive(Debug, Clone)]
+pub struct PokemonStats { pub hp: u32, pub attack: u32, pub defense: u32, pub sp_attack: u32, pub sp_defense: u32, pub speed: u32 }
+
+#[derive(Debug, Clone)]
+pub struct DualType(pub Option<PokemonType>, pub Option<PokemonType>);
+use super::{StateHandler, GameStateType, StateTransition};
 use glam::{Vec2, Vec4};
 use std::collections::HashMap;
+
+// 战斗动画管理器
+#[derive(Debug)]
+pub struct BattleAnimationManager {
+    animations: HashMap<String, String>,
+    current_animation: Option<String>,
+    animation_timer: f32,
+}
+
+impl BattleAnimationManager {
+    pub fn new() -> Self {
+        Self {
+            animations: HashMap::new(),
+            current_animation: None,
+            animation_timer: 0.0,
+        }
+    }
+    
+    pub fn play_animation(&mut self, animation: &str, target: &str) -> Result<(), GameError> {
+        self.current_animation = Some(format!("{}-{}", animation, target));
+        self.animation_timer = 0.0;
+        Ok(())
+    }
+    
+    pub fn update(&mut self, delta_time: f32) -> Result<(), GameError> {
+        if self.current_animation.is_some() {
+            self.animation_timer += delta_time;
+            if self.animation_timer > 2.0 { // 2秒动画时长
+                self.current_animation = None;
+                self.animation_timer = 0.0;
+            }
+        }
+        Ok(())
+    }
+    
+    pub fn render(&mut self, renderer: &mut Renderer2D) -> Result<(), GameError> {
+        // 渲染当前动画效果
+        if let Some(_) = &self.current_animation {
+            // 简单的闪烁效果
+            let alpha = (self.animation_timer * 10.0).sin().abs();
+            renderer.draw_sprite(
+                Vec2::new(400.0, 300.0),
+                Vec2::new(50.0, 50.0),
+                [1.0, 1.0, 0.0, alpha],
+            );
+        }
+        Ok(())
+    }
+    
+    pub fn is_playing(&self) -> bool {
+        self.current_animation.is_some()
+    }
+}
+
+// 状态效果管理器
+#[derive(Debug)]
+pub struct StatusEffectManager {
+    effects: HashMap<u32, Vec<StatusEffect>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct StatusEffect {
+    pub effect_type: u32,
+    pub duration: f32,
+    pub intensity: f32,
+}
+
+impl StatusEffectManager {
+    pub fn new() -> Self {
+        Self {
+            effects: HashMap::new(),
+        }
+    }
+    
+    pub fn update(&mut self, delta_time: f32) -> Result<(), GameError> {
+        // 更新状态效果持续时间
+        for (_, effects) in self.effects.iter_mut() {
+            effects.retain_mut(|effect| {
+                effect.duration -= delta_time;
+                effect.duration > 0.0
+            });
+        }
+        Ok(())
+    }
+    
+    pub fn add_effect(&mut self, pokemon_id: u32, effect: StatusEffect) {
+        self.effects.entry(pokemon_id).or_insert_with(Vec::new).push(effect);
+    }
+    
+    pub fn remove_effect(&mut self, pokemon_id: u32, effect_type: u32) {
+        if let Some(effects) = self.effects.get_mut(&pokemon_id) {
+            effects.retain(|e| e.effect_type != effect_type);
+        }
+    }
+}
 
 // 战斗阶段
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -513,13 +619,13 @@ impl BattleState {
     fn update_hp_bars(&mut self) -> Result<(), GameError> {
         if let (Some(player_pokemon), Some(hp_id)) = 
             (self.player_team.get(self.active_player), self.player_hp_bar) {
-            let hp_percentage = player_pokemon.current_hp as f32 / player_pokemon.stats.actual_stats.hp as f32;
+            let hp_percentage = player_pokemon.current_hp as f32 / player_pokemon.stats.hp as f32;
             self.ui_manager.set_element_value(hp_id, format!("{:.0}%", hp_percentage * 100.0))?;
         }
         
         if let (Some(enemy_pokemon), Some(hp_id)) = 
             (self.enemy_team.get(self.active_enemy), self.enemy_hp_bar) {
-            let hp_percentage = enemy_pokemon.current_hp as f32 / enemy_pokemon.stats.actual_stats.hp as f32;
+            let hp_percentage = enemy_pokemon.current_hp as f32 / enemy_pokemon.stats.hp as f32;
             self.ui_manager.set_element_value(hp_id, format!("{:.0}%", hp_percentage * 100.0))?;
         }
         
@@ -527,7 +633,7 @@ impl BattleState {
     }
 }
 
-impl GameState for BattleState {
+impl StateHandler for BattleState {
     fn get_type(&self) -> GameStateType {
         GameStateType::Battle
     }
@@ -595,23 +701,22 @@ impl GameState for BattleState {
     
     fn render(&mut self, renderer: &mut Renderer2D) -> Result<(), GameError> {
         // 应用屏幕震动
-        renderer.push_camera(crate::graphics::renderer::Camera::new_2d(
-            crate::graphics::renderer::Viewport {
-                x: self.screen_shake.x as i32,
-                y: self.screen_shake.y as i32,
-                width: 800,
-                height: 600,
-            }
-        ));
+        let shake_camera = super::Camera {
+            position: glam::Vec2::new(self.screen_shake.x, self.screen_shake.y),
+            zoom: 1.0,
+            rotation: 0.0,
+            projection_matrix: glam::Mat4::orthographic_rh(
+                -400.0, 400.0, -300.0, 300.0, -1000.0, 1000.0
+            ),
+        };
+        renderer.push_camera(shake_camera);
         
         // 渲染背景
-        renderer.draw_quad(
+        renderer.draw_sprite(
             Vec2::ZERO,
             Vec2::new(800.0, 600.0),
-            self.background_id,
-            Vec4::ONE,
-            0.0,
-        )?;
+            [0.1, 0.2, 0.4, 1.0], // 背景色
+        );
         
         // 渲染Pokemon
         if let Some(player_pokemon) = self.player_team.get(self.active_player) {
@@ -619,13 +724,8 @@ impl GameState for BattleState {
                 renderer.draw_sprite(
                     player_pokemon.position,
                     Vec2::new(100.0, 100.0),
-                    sprite_id,
-                    None,
-                    Vec4::ONE,
-                    0.0,
-                    false,
-                    false,
-                )?;
+                    [1.0, 1.0, 1.0, 1.0], // 白色
+                );
             }
         }
         
@@ -634,13 +734,8 @@ impl GameState for BattleState {
                 renderer.draw_sprite(
                     enemy_pokemon.position,
                     Vec2::new(100.0, 100.0),
-                    sprite_id,
-                    None,
-                    Vec4::ONE,
-                    0.0,
-                    false,
-                    false,
-                )?;
+                    [1.0, 1.0, 1.0, 1.0], // 白色
+                );
             }
         }
         
@@ -650,7 +745,7 @@ impl GameState for BattleState {
         // 渲染UI
         self.ui_manager.render(renderer)?;
         
-        renderer.pop_camera()?;
+        renderer.pop_camera();
         
         Ok(())
     }
@@ -734,7 +829,7 @@ impl GameState for BattleState {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::pokemon::stats::*;
+    // use crate::pokemon::stats::*; // 注释掉直到pokemon模块可用
     
     #[test]
     fn test_battle_state_creation() {
