@@ -2,22 +2,21 @@
 // 开发心理：现代游戏需要美观的视觉效果和流畅的性能
 // 设计原则：GPU驱动、批量渲染、资源高效利用、跨平台兼容
 
-// 逐步实现子模块
+// 图形子模块
 pub mod renderer2d;
 pub mod shader;
 pub mod texture;
 pub mod camera;
-// pub mod renderer;
-// pub mod sprite;
-// pub mod ui;
+pub mod sprite;
+pub mod ui;
 
 // 重新导出已实现的类型
 pub use renderer2d::{Renderer2D, RenderLayer, RenderCommand, sprite_rendering_system};
 pub use shader::{ShaderManager, ShaderProgram, UniformValue, ShaderId, ShaderType, builtin_shaders};
 pub use texture::{TextureManager, TextureDesc, TextureFormat, TextureFilter, TextureType, TextureId, TextureData};
 pub use camera::{Camera, CameraController, ProjectionType, CameraType, Ray, Plane};
-// pub use sprite::{Sprite, SpriteRenderer, SpriteBatch, SpriteAnimation};
-// pub use ui::{UIRenderer, UIElement, UIManager};
+pub use sprite::{Sprite, SpriteRenderer, SpriteBatch, SpriteAnimation};
+pub use ui::{UIRenderer, UIElement, UIManager};
 
 use crate::core::{GameError, Result};
 use crate::core::resource_manager::{ResourceManager, ResourceHandle};

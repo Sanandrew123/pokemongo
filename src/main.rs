@@ -1,127 +1,225 @@
-// 高性能宝可梦游戏主程序入口
-// 开发心理：简洁的启动流程，专注于初始化和游戏循环管理
-// 使用Bevy引擎的App架构，保持代码整洁和可测试性
+/*
+* 开发心理过程：
+* 1. 这是游戏的主入口文件，需要初始化Bevy游戏引擎
+* 2. 设置游戏窗口、基本配置和插件系统
+* 3. 添加游戏状态管理和主要系统
+* 4. 使用feature flags控制不同模块的编译
+* 5. 集成自定义模块：Pokemon系统、战斗系统、世界系统等
+* 6. 提供清晰的应用程序生命周期管理
+* 7. 确保高性能启动和资源加载
+*/
 
-use pokemongo::{
-    App, GameConfig, GameError, Result,
-    init, cleanup,
-};
-use std::env;
-use log::{info, error};
+use bevy::prelude::*;
+use bevy::log::LogPlugin;
+use bevy::window::{WindowPlugin, WindowResolution};
+use bevy::asset::AssetPlugin;
+
+// 核心模块
+mod core;
+mod utils;
+mod ecs;
+mod data;
+mod assets;
+mod audio;
+mod graphics;
+mod input;
+mod states;
+mod save;
+mod game_modes;
+mod creature_engine;
+
+// 游戏系统模块
+#[cfg(feature = "pokemon-wip")]
+mod pokemon;
+
+#[cfg(feature = "battle-wip")]
+mod battle;
+
+mod world;
+mod player;
+mod ui;
+
+#[cfg(feature = "network-wip")]
+mod network;
+
+// FFI接口
+#[cfg(feature = "native")]
+mod ffi;
+
+// Engine模块
+#[cfg(feature = "custom-engine")]
+mod engine;
+
+use crate::core::app::PokemonApp;
+use crate::states::{GameState, loading::LoadingPlugin, menu::MenuPlugin};
+use crate::graphics::renderer::PokemonRendererPlugin;
+use crate::input::PokemonInputPlugin;
+use crate::audio::PokemonAudioPlugin;
+use crate::data::PokemonDataPlugin;
+use crate::player::PokemonPlayerPlugin;
+
+#[cfg(feature = "pokemon-wip")]
+use crate::pokemon::PokemonSystemPlugin;
+
+#[cfg(feature = "battle-wip")]
+use crate::battle::PokemonBattlePlugin;
+
+use crate::world::PokemonWorldPlugin;
+use crate::ui::PokemonUIPlugin;
+
+#[cfg(feature = "network-wip")]
+use crate::network::PokemonNetworkPlugin;
 
 fn main() {
-    // 初始化日志系统
-    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info"))
-        .init();
+    tracing::info!("启动高性能Pokemon游戏引擎 v1.0.0");
     
-    info!("🎮 启动宝可梦游戏 v{}", pokemongo::VERSION);
+    let mut app = App::new();
     
-    // 运行游戏，处理所有错误
-    if let Err(e) = run_game() {
-        error!("游戏运行失败: {}", e);
-        std::process::exit(1);
-    }
-    
-    // 清理资源
-    cleanup();
-    info!("游戏正常退出");
-}
-
-fn run_game() -> Result<()> {
-    // 解析命令行参数
-    let args: Vec<String> = env::args().collect();
-    let config = parse_args(&args)?;
-    
-    // 初始化游戏引擎
-    init()?;
-    
-    // 创建并运行应用程序
-    let mut app = App::new(config)?;
-    app.run()
-}
-
-fn parse_args(args: &[String]) -> Result<GameConfig> {
-    let mut config = GameConfig::default();
-    
-    for (i, arg) in args.iter().enumerate() {
-        match arg.as_str() {
-            "--fullscreen" => config.graphics.fullscreen = true,
-            "--windowed" => config.graphics.fullscreen = false,
-            "--debug" => config.debug_mode = true,
-            "--no-audio" => config.audio.enabled = false,
-            "--resolution" => {
-                if i + 1 < args.len() {
-                    let resolution = &args[i + 1];
-                    let parts: Vec<&str> = resolution.split('x').collect();
-                    if parts.len() == 2 {
-                        config.graphics.width = parts[0].parse().unwrap_or(1280);
-                        config.graphics.height = parts[1].parse().unwrap_or(720);
-                    }
-                }
-            },
-            "--help" | "-h" => {
-                print_help();
-                std::process::exit(0);
-            },
-            _ => {}
+    // 基础Bevy插件
+    app.add_plugins(DefaultPlugins.set(
+        WindowPlugin {
+            primary_window: Some(Window {
+                title: "Pokemon Adventure - Rust Engine".into(),
+                resolution: WindowResolution::new(1280.0, 720.0),
+                resizable: true,
+                ..default()
+            }),
+            ..default()
         }
-    }
+    ).set(
+        AssetPlugin {
+            mode: bevy::asset::AssetMode::Processed,
+            ..default()
+        }
+    ).set(
+        LogPlugin {
+            level: bevy::log::Level::INFO,
+            filter: "pokemongo=trace,wgpu_core=warn,wgpu_hal=warn,naga=info".into(),
+            ..default()
+        }
+    ));
+
+    // 游戏状态管理
+    app.init_state::<GameState>()
+        .enable_state_scoped_entities::<GameState>();
+
+    // 核心游戏插件
+    app.add_plugins(PokemonApp)
+        .add_plugins(LoadingPlugin)
+        .add_plugins(MenuPlugin)
+        .add_plugins(PokemonRendererPlugin)
+        .add_plugins(PokemonInputPlugin)
+        .add_plugins(PokemonAudioPlugin)
+        .add_plugins(PokemonDataPlugin)
+        .add_plugins(PokemonPlayerPlugin)
+        .add_plugins(PokemonWorldPlugin)
+        .add_plugins(PokemonUIPlugin);
+
+    // 条件编译的模块插件
+    #[cfg(feature = "pokemon-wip")]
+    app.add_plugins(PokemonSystemPlugin);
+
+    #[cfg(feature = "battle-wip")]
+    app.add_plugins(PokemonBattlePlugin);
+
+    #[cfg(feature = "network-wip")]
+    app.add_plugins(PokemonNetworkPlugin);
+
+    // 系统配置
+    app.add_systems(Startup, setup_game)
+        .add_systems(Update, (
+            handle_exit_conditions,
+            performance_monitoring,
+        ));
+
+    // 启动游戏
+    tracing::info!("游戏引擎初始化完成，开始运行");
+    app.run();
+}
+
+fn setup_game(
+    mut commands: Commands,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    tracing::info!("设置游戏初始状态");
     
-    Ok(config)
+    // 添加游戏配置资源
+    commands.insert_resource(core::config::GameConfig::default());
+    commands.insert_resource(core::time::GameTimer::default());
+    
+    // 初始化ECS世界
+    commands.insert_resource(crate::ecs::ECSWorld::new());
+    
+    // 启动加载状态
+    next_state.set(GameState::Loading);
+    
+    tracing::info!("游戏初始状态设置完成");
 }
 
-fn print_help() {
-    println!("宝可梦游戏 v{}", pokemongo::VERSION);
-    println!();
-    println!("使用方法:");
-    println!("  {} [选项]", env!("CARGO_BIN_NAME"));
-    println!();
-    println!("选项:");
-    println!("  --fullscreen     全屏模式");
-    println!("  --windowed       窗口模式");
-    println!("  --resolution WxH 设置分辨率 (例: --resolution 1920x1080)");
-    println!("  --debug          启用调试模式");
-    println!("  --no-audio       禁用音频");
-    println!("  --help, -h       显示帮助信息");
-    println!();
-    println!("示例:");
-    println!("  {} --fullscreen --resolution 1920x1080", env!("CARGO_BIN_NAME"));
-    println!("  {} --windowed --debug", env!("CARGO_BIN_NAME"));
+fn handle_exit_conditions(
+    input: Res<ButtonInput<KeyCode>>,
+    mut app_exit: EventWriter<bevy::app::AppExit>,
+) {
+    if input.just_pressed(KeyCode::Escape) && input.pressed(KeyCode::AltLeft) {
+        tracing::info!("用户请求退出游戏");
+        app_exit.send(bevy::app::AppExit::Success);
+    }
 }
 
+fn performance_monitoring(
+    time: Res<Time>,
+    mut timer: Local<f32>,
+) {
+    *timer += time.delta_seconds();
+    
+    if *timer >= 60.0 {
+        let fps = 1.0 / time.delta_seconds();
+        tracing::debug!("性能监控 - FPS: {:.1}, 帧时间: {:.2}ms", 
+            fps, time.delta_seconds() * 1000.0);
+        *timer = 0.0;
+    }
+}
+
+// 导出公共API
+pub use crate::core::*;
+pub use crate::utils::*;
+
+#[cfg(feature = "pokemon-wip")]
+pub use crate::pokemon::*;
+
+#[cfg(feature = "battle-wip")]
+pub use crate::battle::*;
+
+pub use crate::world::*;
+pub use crate::player::*;
+
+// 测试模块
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+    use bevy::app::App;
+
     #[test]
-    fn test_parse_args_default() {
-        let args = vec!["pokemongo".to_string()];
-        let config = parse_args(&args).unwrap();
-        
-        assert_eq!(config.graphics.width, 1280);
-        assert_eq!(config.graphics.height, 720);
-        assert!(!config.graphics.fullscreen);
-        assert!(config.audio.enabled);
+    fn test_app_creation() {
+        let app = App::new();
+        assert!(app.world().entities().len() == 0);
     }
-    
+
     #[test]
-    fn test_parse_args_fullscreen() {
-        let args = vec!["pokemongo".to_string(), "--fullscreen".to_string()];
-        let config = parse_args(&args).unwrap();
+    fn test_game_state_initialization() {
+        let mut app = App::new();
+        app.init_state::<GameState>();
         
-        assert!(config.graphics.fullscreen);
+        let current_state = app.world().resource::<State<GameState>>();
+        assert_eq!(**current_state, GameState::Loading);
     }
-    
+
     #[test]
-    fn test_parse_args_resolution() {
-        let args = vec![
-            "pokemongo".to_string(),
-            "--resolution".to_string(),
-            "1920x1080".to_string(),
-        ];
-        let config = parse_args(&args).unwrap();
+    fn test_performance_monitoring_system() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+           .add_systems(Update, performance_monitoring);
         
-        assert_eq!(config.graphics.width, 1920);
-        assert_eq!(config.graphics.height, 1080);
+        app.update();
     }
 }
