@@ -6,6 +6,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use log::{debug, warn};
 
+// 手柄ID类型
+pub type GamepadId = u32;
+
 // 手柄按键定义
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum GamepadButton {

@@ -265,7 +265,11 @@ impl DataManager {
             match data_type {
                 DataType::Pokemon => {
                     let pokemon_ids: Vec<String> = (1..152).map(|i| i.to_string()).collect();
+                    #[cfg(feature = "pokemon-wip")]
                     let _: Result<HashMap<String, crate::pokemon::species::PokemonSpecies>, _> = 
+                        self.load_data_batch(DataType::Pokemon, &pokemon_ids);
+                    #[cfg(not(feature = "pokemon-wip"))]
+                    let _: Result<HashMap<String, crate::game_modes::PokemonSpecies>, _> = 
                         self.load_data_batch(DataType::Pokemon, &pokemon_ids);
                 },
                 DataType::Items => {

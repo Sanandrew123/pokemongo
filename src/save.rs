@@ -5,7 +5,16 @@
 use crate::core::{GameError, Result};
 use crate::player::Player;
 use crate::game_modes::{GameMode, GameState};
+#[cfg(feature = "pokemon-wip")]
 use crate::pokemon::Pokemon;
+
+#[cfg(not(feature = "pokemon-wip"))]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct Pokemon {
+    pub id: u64,
+    pub species_id: u32,
+    pub level: u8,
+}
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::{File, create_dir_all};

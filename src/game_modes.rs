@@ -3,7 +3,27 @@
 // 设计原则：状态机驱动、可扩展的模式系统、流畅的模式切换
 
 use crate::core::{GameError, Result};
+#[cfg(feature = "pokemon-wip")]
 use crate::pokemon::{Pokemon, PokemonSpecies, SpeciesId};
+
+// 临时类型定义，直到pokemon模块可用
+#[cfg(not(feature = "pokemon-wip"))]
+#[derive(Debug, Clone)]
+pub struct Pokemon {
+    pub id: u64,
+    pub species_id: u32,
+    pub level: u8,
+}
+
+#[cfg(not(feature = "pokemon-wip"))]
+#[derive(Debug, Clone)]
+pub struct PokemonSpecies {
+    pub id: u32,
+    pub name: String,
+}
+
+#[cfg(not(feature = "pokemon-wip"))]
+pub type SpeciesId = u32;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};

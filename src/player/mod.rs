@@ -6,8 +6,58 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use log::{debug, warn, error};
 use crate::core::error::GameError;
+#[cfg(feature = "pokemon-wip")]
 use crate::pokemon::stats::PokemonStats;
+#[cfg(feature = "pokemon-wip")]
 use crate::pokemon::types::DualType;
+
+// 临时类型定义，直到pokemon模块可用
+#[cfg(not(feature = "pokemon-wip"))]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PokemonStats {
+    pub hp: u32,
+    pub attack: u32,
+    pub defense: u32,
+    pub special_attack: u32,
+    pub special_defense: u32,
+    pub speed: u32,
+}
+
+#[cfg(not(feature = "pokemon-wip"))]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DualType {
+    pub primary: u32,
+    pub secondary: Option<u32>,
+}
+
+#[cfg(not(feature = "pokemon-wip"))]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Nature {
+    pub id: u32,
+    pub name: String,
+}
+
+#[cfg(not(feature = "pokemon-wip"))]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IndividualValues {
+    pub hp: u8,
+    pub attack: u8,
+    pub defense: u8,
+    pub special_attack: u8,
+    pub special_defense: u8,
+    pub speed: u8,
+}
+
+#[cfg(not(feature = "pokemon-wip"))]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EffortValues {
+    pub hp: u8,
+    pub attack: u8,
+    pub defense: u8,
+    pub special_attack: u8,
+    pub special_defense: u8,
+    pub speed: u8,
+}
 use glam::Vec2;
 
 pub mod inventory;
@@ -64,9 +114,18 @@ pub struct PokemonInstance {
     pub types: DualType,
     pub moves: Vec<u32>,
     pub ability: u32,
+    #[cfg(feature = "pokemon-wip")]
     pub nature: crate::pokemon::stats::Nature,
+    #[cfg(not(feature = "pokemon-wip"))]
+    pub nature: Nature,
+    #[cfg(feature = "pokemon-wip")]
     pub individual_values: crate::pokemon::stats::IndividualValues,
+    #[cfg(not(feature = "pokemon-wip"))]
+    pub individual_values: IndividualValues,
+    #[cfg(feature = "pokemon-wip")]
     pub effort_values: crate::pokemon::stats::EffortValues,
+    #[cfg(not(feature = "pokemon-wip"))]
+    pub effort_values: EffortValues,
     pub friendship: u8,
     pub original_trainer: String,
     pub catch_date: std::time::SystemTime,

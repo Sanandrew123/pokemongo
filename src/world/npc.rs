@@ -6,7 +6,19 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use log::{debug, warn, error};
 use crate::core::error::GameError;
+#[cfg(feature = "pokemon-wip")]
 use crate::pokemon::stats::PokemonStats;
+
+#[cfg(not(feature = "pokemon-wip"))]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct PokemonStats {
+    pub hp: u32,
+    pub attack: u32,
+    pub defense: u32,
+    pub special_attack: u32,
+    pub special_defense: u32,
+    pub speed: u32,
+}
 use glam::{Vec2, Vec3};
 
 // NPC ID类型

@@ -6,8 +6,43 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use log::{debug, warn, error};
 use crate::core::error::GameError;
+#[cfg(feature = "graphics-wip")]
 use crate::graphics::renderer::Renderer2D;
+#[cfg(feature = "graphics-wip")]
 use crate::graphics::sprite::SpriteManager;
+
+// 临时类型定义，直到graphics模块可用
+#[cfg(not(feature = "graphics-wip"))]
+#[derive(Debug)]
+pub struct Renderer2D;
+
+#[cfg(not(feature = "graphics-wip"))]
+#[derive(Debug)]
+pub struct SpriteManager;
+
+#[cfg(not(feature = "graphics-wip"))]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct BlendMode;
+
+#[cfg(not(feature = "graphics-wip"))]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct Vertex {
+    pub position: [f32; 3],
+    pub uv: [f32; 2],
+    pub color: [f32; 4],
+}
+
+#[cfg(not(feature = "graphics-wip"))]
+impl Default for BlendMode {
+    fn default() -> Self {
+        Self
+    }
+}
+
+#[cfg(not(feature = "graphics-wip"))]
+impl BlendMode {
+    pub const Alpha: BlendMode = BlendMode;
+}
 use glam::{Vec2, Vec3, Vec4};
 
 // 地图ID和坐标类型
@@ -70,7 +105,10 @@ pub struct MapLayer {
     pub tileset: Option<String>,        // 瓦片集名称
     
     // 渲染属性
+    #[cfg(feature = "graphics-wip")]
     pub blend_mode: crate::graphics::renderer::BlendMode,
+    #[cfg(not(feature = "graphics-wip"))]
+    pub blend_mode: BlendMode,
     pub tint_color: Vec4,
     pub scroll_speed: Vec2,             // 自动滚动速度
 }
@@ -113,7 +151,10 @@ pub struct MapChunk {
     pub collision_data: Vec<CollisionTile>,
     
     // 渲染优化
+    #[cfg(feature = "graphics-wip")]
     pub vertex_buffer: Option<Vec<crate::graphics::renderer::Vertex>>,
+    #[cfg(not(feature = "graphics-wip"))]
+    pub vertex_buffer: Option<Vec<Vertex>>,
     pub texture_atlas: Option<u32>,
     pub last_rendered_frame: u64,
 }
@@ -309,7 +350,10 @@ impl GameMap {
             parallax_factor: Vec2::ONE,
             tiles: HashMap::new(),
             tileset: None,
+            #[cfg(feature = "graphics-wip")]
             blend_mode: crate::graphics::renderer::BlendMode::Alpha,
+            #[cfg(not(feature = "graphics-wip"))]
+            blend_mode: BlendMode::Alpha,
             tint_color: Vec4::ONE,
             scroll_speed: Vec2::ZERO,
         };

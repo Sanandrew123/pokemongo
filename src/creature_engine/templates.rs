@@ -15,7 +15,7 @@ use std::sync::{Arc, RwLock};
 use serde::{Serialize, Deserialize};
 use serde_json;
 use toml;
-use notify::{Watcher, RecursiveMode, watcher, DebouncedEvent};
+use notify::{Watcher, RecursiveMode, Event as NotifyEvent, EventKind, RecommendedWatcher};
 use std::sync::mpsc::{channel, Receiver};
 use std::time::Duration;
 
@@ -142,7 +142,7 @@ pub struct TemplateManager {
     collections: Arc<RwLock<HashMap<String, TemplateCollection>>>,
     template_paths: Vec<PathBuf>,
     file_watcher: Option<notify::RecommendedWatcher>,
-    reload_receiver: Option<Receiver<DebouncedEvent>>,
+    reload_receiver: Option<Receiver<NotifyEvent>>,
     inheritance_graph: Arc<RwLock<HashMap<String, Vec<String>>>>,
     cache: Arc<RwLock<HashMap<String, CachedTemplate>>>,
 }
@@ -324,14 +324,16 @@ impl TemplateManager {
         if let Some(receiver) = &self.reload_receiver {
             while let Ok(event) = receiver.try_recv() {
                 match event {
-                    DebouncedEvent::Write(path) | DebouncedEvent::Create(path) => {
+                    Ok(event) if matches!(event.kind, EventKind::Create(_) | EventKind::Modify(_)) => {
+                        let path = event.paths.get(0).unwrap();
                         if let Some(template_id) = self.extract_template_id_from_path(&path) {
                             if self.reload_template(&template_id).is_ok() {
                                 updated_templates.push(template_id);
                             }
                         }
                     }
-                    DebouncedEvent::Remove(path) => {
+                    Ok(event) if matches!(event.kind, EventKind::Remove(_)) => {
+                        let path = event.paths.get(0).unwrap();
                         if let Some(template_id) = self.extract_template_id_from_path(&path) {
                             let _ = self.remove_template(&template_id);
                             updated_templates.push(template_id);
@@ -364,7 +366,11 @@ impl TemplateManager {
 
     fn setup_file_watcher(&mut self) -> CreatureEngineResult<()> {
         let (tx, rx) = channel();
-        let mut watcher = watcher(tx, Duration::from_secs(2)).map_err(|e| {
+        let mut watcher = RecommendedWatcher::new(move |res| {
+            if let Ok(event) = res {
+                let _ = tx.send(event);
+            }
+        }, notify::Config::default()).map_err(|e| {
             CreatureEngineError::ConfigError(format!("Failed to create file watcher: {}", e))
         })?;
 

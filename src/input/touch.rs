@@ -6,6 +6,12 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use log::debug;
 
+// 触摸点ID类型
+pub type TouchId = u64;
+
+// 触摸阶段 (为兼容性而添加的别名)
+pub type TouchPhase = TouchState;
+
 // 触摸点状态
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TouchState {

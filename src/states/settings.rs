@@ -4,11 +4,18 @@
 
 use log::{debug, warn, error};
 use crate::core::error::GameError;
+#[cfg(feature = "graphics-wip")]
 use crate::graphics::Renderer2D;
+#[cfg(feature = "graphics-wip")]
 use crate::graphics::ui::{UIManager, ElementType};
+
+#[cfg(not(feature = "graphics-wip"))]
+use crate::states::Renderer2D;
+#[cfg(not(feature = "graphics-wip"))]
+use crate::ui::{UIManager, ElementType};
 use crate::input::mouse::MouseEvent;
 use crate::input::gamepad::GamepadEvent;
-use super::{GameState, GameStateType, StateTransition};
+use super::{StateHandler, GameStateType, StateTransition};
 use glam::{Vec2, Vec4};
 use std::collections::HashMap;
 

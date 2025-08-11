@@ -85,7 +85,10 @@ pub enum EntityComponent {
     Movement { speed: f32, direction: Vec2 },
     AI { behavior: String, state: HashMap<String, String> },
     Interaction { interaction_type: String, data: HashMap<String, String> },
+    #[cfg(feature = "pokemon-wip")]
     Pokemon { species_id: u32, level: u8, stats: Option<crate::pokemon::stats::PokemonStats> },
+    #[cfg(not(feature = "pokemon-wip"))]
+    Pokemon { species_id: u32, level: u8, stats: Option<crate::world::npc::PokemonStats> },
     Item { item_id: u32, quantity: u32 },
 }
 
