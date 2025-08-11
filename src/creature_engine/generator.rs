@@ -79,7 +79,7 @@ pub struct StandardStatCalculator {
 impl StatCalculator for StandardStatCalculator {
     fn calculate_stat(&self, base: u32, level: u8, iv: u8, ev: u8, nature_modifier: f64) -> u32 {
         if self.stat_name == "hp" {
-            ((((2 * base + iv as u32 + (ev as u32 / 4)) * level as u32) / 100) + level as u32 + 10) as f64 * nature_modifier) as u32
+            (((((2 * base + iv as u32 + (ev as u32 / 4)) * level as u32) / 100) + level as u32 + 10) as f64 * nature_modifier) as u32
         } else {
             (((((2 * base + iv as u32 + (ev as u32 / 4)) * level as u32) / 100) + 5) as f64 * nature_modifier) as u32
         }
