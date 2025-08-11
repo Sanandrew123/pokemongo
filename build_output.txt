@@ -1,0 +1,987 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on build directory
+   Compiling bevy_ecs v0.14.2
+   Compiling pokemongo v0.1.0 (C:\Users\w2107\Desktop\pk1\pokemongo)
+warning: pokemongo@0.1.0: native feature鏈惎鐢紝璺宠繃C++妯″潡缂栬瘧
+   Compiling bevy_app v0.14.2
+   Compiling bevy_core v0.14.2
+   Compiling bevy_time v0.14.2
+   Compiling bevy_a11y v0.14.2
+   Compiling bevy_asset v0.14.2
+   Compiling bevy_input v0.14.2
+   Compiling bevy_log v0.14.2
+   Compiling bevy_window v0.14.2
+   Compiling bevy_hierarchy v0.14.2
+   Compiling bevy_diagnostic v0.14.2
+   Compiling bevy_transform v0.14.2
+   Compiling bevy_state v0.14.2
+   Compiling bevy_gilrs v0.14.2
+   Compiling bevy_winit v0.14.2
+   Compiling bevy_render v0.14.2
+   Compiling bevy_audio v0.14.2
+   Compiling bevy_core_pipeline v0.14.2
+   Compiling bevy_scene v0.14.2
+   Compiling bevy_animation v0.14.2
+   Compiling bevy_sprite v0.14.2
+   Compiling bevy_pbr v0.14.2
+   Compiling bevy_text v0.14.2
+   Compiling bevy_ui v0.14.2
+   Compiling bevy_gltf v0.14.2
+   Compiling bevy_gizmos v0.14.2
+   Compiling bevy_internal v0.14.2
+   Compiling bevy v0.14.2
+error[E0432]: unresolved imports `notify::watcher`, `notify::DebouncedEvent`
+  --> src\creature_engine\templates.rs:18:38
+   |
+18 | use notify::{Watcher, RecursiveMode, watcher, DebouncedEvent};
+   |                                      ^^^^^^^  ^^^^^^^^^^^^^^ no `DebouncedEvent` in the root
+   |                                      |
+   |                                      no `watcher` in the root
+   |                                      help: a similar name exists in the module (notice the capitalization): `Watcher`
+
+error[E0433]: failed to resolve: could not find `pokemon` in the crate root
+  --> src\player\mod.rs:9:12
+   |
+9  | use crate::pokemon::stats::PokemonStats;
+   |            ^^^^^^^ could not find `pokemon` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:13:9
+   |
+13 | pub mod pokemon;
+   |         ^^^^^^^
+note: the item is gated behind the `pokemon-wip` feature
+  --> src\lib.rs:12:7
+   |
+12 | #[cfg(feature = "pokemon-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `pokemon` in the crate root
+  --> src\player\mod.rs:10:12
+   |
+10 | use crate::pokemon::types::DualType;
+   |            ^^^^^^^ could not find `pokemon` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:13:9
+   |
+13 | pub mod pokemon;
+   |         ^^^^^^^
+note: the item is gated behind the `pokemon-wip` feature
+  --> src\lib.rs:12:7
+   |
+12 | #[cfg(feature = "pokemon-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0432]: unresolved import `crate::pokemon`
+  --> src\game_modes.rs:6:12
+   |
+6  | use crate::pokemon::{Pokemon, PokemonSpecies, SpeciesId};
+   |            ^^^^^^^ could not find `pokemon` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:13:9
+   |
+13 | pub mod pokemon;
+   |         ^^^^^^^
+note: the item is gated behind the `pokemon-wip` feature
+  --> src\lib.rs:12:7
+   |
+12 | #[cfg(feature = "pokemon-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `graphics` in the crate root
+  --> src\world\map.rs:9:12
+   |
+9  | use crate::graphics::renderer::Renderer2D;
+   |            ^^^^^^^^ could not find `graphics` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:19:9
+   |
+19 | pub mod graphics;
+   |         ^^^^^^^^
+note: the item is gated behind the `graphics-wip` feature
+  --> src\lib.rs:18:7
+   |
+18 | #[cfg(feature = "graphics-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `graphics` in the crate root
+  --> src\world\map.rs:10:12
+   |
+10 | use crate::graphics::sprite::SpriteManager;
+   |            ^^^^^^^^ could not find `graphics` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:19:9
+   |
+19 | pub mod graphics;
+   |         ^^^^^^^^
+note: the item is gated behind the `graphics-wip` feature
+  --> src\lib.rs:18:7
+   |
+18 | #[cfg(feature = "graphics-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `pokemon` in the crate root
+  --> src\world\npc.rs:9:12
+   |
+9  | use crate::pokemon::stats::PokemonStats;
+   |            ^^^^^^^ could not find `pokemon` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:13:9
+   |
+13 | pub mod pokemon;
+   |         ^^^^^^^
+note: the item is gated behind the `pokemon-wip` feature
+  --> src\lib.rs:12:7
+   |
+12 | #[cfg(feature = "pokemon-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0432]: unresolved import `crate::pokemon`
+  --> src\save.rs:8:12
+   |
+8  | use crate::pokemon::Pokemon;
+   |            ^^^^^^^ could not find `pokemon` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:13:9
+   |
+13 | pub mod pokemon;
+   |         ^^^^^^^
+note: the item is gated behind the `pokemon-wip` feature
+  --> src\lib.rs:12:7
+   |
+12 | #[cfg(feature = "pokemon-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `graphics` in the crate root
+  --> src\states\overworld.rs:8:12
+   |
+8  | use crate::graphics::ui::UIManager;
+   |            ^^^^^^^^ could not find `graphics` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:19:9
+   |
+19 | pub mod graphics;
+   |         ^^^^^^^^
+note: the item is gated behind the `graphics-wip` feature
+  --> src\lib.rs:18:7
+   |
+18 | #[cfg(feature = "graphics-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0432]: unresolved import `crate::graphics`
+  --> src\states\overworld.rs:7:12
+   |
+7  | use crate::graphics::Renderer2D;
+   |            ^^^^^^^^ could not find `graphics` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:19:9
+   |
+19 | pub mod graphics;
+   |         ^^^^^^^^
+note: the item is gated behind the `graphics-wip` feature
+  --> src\lib.rs:18:7
+   |
+18 | #[cfg(feature = "graphics-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `graphics` in the crate root
+  --> src\states\settings.rs:8:12
+   |
+8  | use crate::graphics::ui::{UIManager, ElementType};
+   |            ^^^^^^^^ could not find `graphics` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:19:9
+   |
+19 | pub mod graphics;
+   |         ^^^^^^^^
+note: the item is gated behind the `graphics-wip` feature
+  --> src\lib.rs:18:7
+   |
+18 | #[cfg(feature = "graphics-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0432]: unresolved import `crate::graphics`
+  --> src\states\settings.rs:7:12
+   |
+7  | use crate::graphics::Renderer2D;
+   |            ^^^^^^^^ could not find `graphics` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:19:9
+   |
+19 | pub mod graphics;
+   |         ^^^^^^^^
+note: the item is gated behind the `graphics-wip` feature
+  --> src\lib.rs:18:7
+   |
+18 | #[cfg(feature = "graphics-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `graphics` in the crate root
+  --> src\states\loading.rs:8:12
+   |
+8  | use crate::graphics::ui::{UIManager, ElementType, UIEvent};
+   |            ^^^^^^^^ could not find `graphics` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:19:9
+   |
+19 | pub mod graphics;
+   |         ^^^^^^^^
+note: the item is gated behind the `graphics-wip` feature
+  --> src\lib.rs:18:7
+   |
+18 | #[cfg(feature = "graphics-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0432]: unresolved import `crate::graphics`
+  --> src\states\loading.rs:7:12
+   |
+7  | use crate::graphics::Renderer2D;
+   |            ^^^^^^^^ could not find `graphics` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:19:9
+   |
+19 | pub mod graphics;
+   |         ^^^^^^^^
+note: the item is gated behind the `graphics-wip` feature
+  --> src\lib.rs:18:7
+   |
+18 | #[cfg(feature = "graphics-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0432]: unresolved import `super::GameState`
+  --> src\states\overworld.rs:11:13
+   |
+11 | use super::{GameState, GameStateType, StateTransition};
+   |             ^^^^^^^^^ no `GameState` in `states`
+   |
+   = help: consider importing this enum instead:
+           crate::game_modes::GameState
+
+error[E0432]: unresolved import `super::GameState`
+  --> src\states\settings.rs:11:13
+   |
+11 | use super::{GameState, GameStateType, StateTransition};
+   |             ^^^^^^^^^ no `GameState` in `states`
+   |
+   = help: consider importing this enum instead:
+           crate::game_modes::GameState
+
+error[E0432]: unresolved import `super::GameState`
+  --> src\states\loading.rs:11:13
+   |
+11 | use super::{GameState, GameStateType, StateTransition};
+   |             ^^^^^^^^^ no `GameState` in `states`
+   |
+   = help: consider importing this enum instead:
+           crate::game_modes::GameState
+
+error[E0432]: unresolved import `gamepad::GamepadId`
+  --> src\input\mod.rs:12:63
+   |
+12 | pub use gamepad::{GamepadManager, GamepadButton, GamepadAxis, GamepadId};
+   |                                                               ^^^^^^^^^ no `GamepadId` in `input::gamepad`
+
+error[E0432]: unresolved imports `touch::TouchPhase`, `touch::TouchId`
+  --> src\input\mod.rs:13:43
+   |
+13 | pub use touch::{TouchManager, TouchEvent, TouchPhase, TouchId};
+   |                                           ^^^^^^^^^^  ^^^^^^^ no `TouchId` in `input::touch`
+   |                                           |
+   |                                           no `TouchPhase` in `input::touch`
+   |                                           help: a similar name exists in the module: `TouchState`
+
+error[E0433]: failed to resolve: could not find `pokemon` in the crate root
+  --> src\player\mod.rs:67:24
+   |
+67 |     pub nature: crate::pokemon::stats::Nature,
+   |                        ^^^^^^^ could not find `pokemon` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:13:9
+   |
+13 | pub mod pokemon;
+   |         ^^^^^^^
+note: the item is gated behind the `pokemon-wip` feature
+  --> src\lib.rs:12:7
+   |
+12 | #[cfg(feature = "pokemon-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `pokemon` in the crate root
+  --> src\player\mod.rs:68:35
+   |
+68 |     pub individual_values: crate::pokemon::stats::IndividualValues,
+   |                                   ^^^^^^^ could not find `pokemon` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:13:9
+   |
+13 | pub mod pokemon;
+   |         ^^^^^^^
+note: the item is gated behind the `pokemon-wip` feature
+  --> src\lib.rs:12:7
+   |
+12 | #[cfg(feature = "pokemon-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `pokemon` in the crate root
+  --> src\player\mod.rs:69:31
+   |
+69 |     pub effort_values: crate::pokemon::stats::EffortValues,
+   |                               ^^^^^^^ could not find `pokemon` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:13:9
+   |
+13 | pub mod pokemon;
+   |         ^^^^^^^
+note: the item is gated behind the `pokemon-wip` feature
+  --> src\lib.rs:12:7
+   |
+12 | #[cfg(feature = "pokemon-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `graphics` in the crate root
+  --> src\world\map.rs:73:28
+   |
+73 |     pub blend_mode: crate::graphics::renderer::BlendMode,
+   |                            ^^^^^^^^ could not find `graphics` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:19:9
+   |
+19 | pub mod graphics;
+   |         ^^^^^^^^
+note: the item is gated behind the `graphics-wip` feature
+  --> src\lib.rs:18:7
+   |
+18 | #[cfg(feature = "graphics-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `graphics` in the crate root
+   --> src\world\map.rs:116:42
+    |
+116 |     pub vertex_buffer: Option<Vec<crate::graphics::renderer::Vertex>>,
+    |                                          ^^^^^^^^ could not find `graphics` in the crate root
+    |
+note: found an item that was configured out
+   --> src\lib.rs:19:9
+    |
+19  | pub mod graphics;
+    |         ^^^^^^^^
+note: the item is gated behind the `graphics-wip` feature
+   --> src\lib.rs:18:7
+    |
+18  | #[cfg(feature = "graphics-wip")]
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `graphics` in the crate root
+   --> src\world\map.rs:312:32
+    |
+312 |             blend_mode: crate::graphics::renderer::BlendMode::Alpha,
+    |                                ^^^^^^^^ could not find `graphics` in the crate root
+    |
+note: found an item that was configured out
+   --> src\lib.rs:19:9
+    |
+19  | pub mod graphics;
+    |         ^^^^^^^^
+note: the item is gated behind the `graphics-wip` feature
+   --> src\lib.rs:18:7
+    |
+18  | #[cfg(feature = "graphics-wip")]
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `pokemon` in the crate root
+  --> src\world\mod.rs:88:64
+   |
+88 |     Pokemon { species_id: u32, level: u8, stats: Option<crate::pokemon::stats::PokemonStats> },
+   |                                                                ^^^^^^^ could not find `pokemon` in the crate root
+   |
+note: found an item that was configured out
+  --> src\lib.rs:13:9
+   |
+13 | pub mod pokemon;
+   |         ^^^^^^^
+note: the item is gated behind the `pokemon-wip` feature
+  --> src\lib.rs:12:7
+   |
+12 | #[cfg(feature = "pokemon-wip")]
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: could not find `pokemon` in the crate root
+   --> src\data\mod.rs:268:58
+    |
+268 |                     let _: Result<HashMap<String, crate::pokemon::species::PokemonSpecies>, _> = 
+    |                                                          ^^^^^^^ could not find `pokemon` in the crate root
+    |
+note: found an item that was configured out
+   --> src\lib.rs:13:9
+    |
+13  | pub mod pokemon;
+    |         ^^^^^^^
+note: the item is gated behind the `pokemon-wip` feature
+   --> src\lib.rs:12:7
+    |
+12  | #[cfg(feature = "pokemon-wip")]
+    |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `error` and `warn`
+  --> src\core\config.rs:22:21
+   |
+22 | use tracing::{info, warn, error, debug};
+   |                     ^^^^  ^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `Arc`
+ --> src\core\event_system.rs:7:17
+  |
+7 | use std::sync::{Arc, Mutex, RwLock};
+  |                 ^^^
+
+warning: unused import: `HashSet`
+ --> src\core\resource_manager.rs:6:33
+  |
+6 | use std::collections::{HashMap, HashSet};
+  |                                 ^^^^^^^
+
+warning: unused import: `TypeId`
+  --> src\core\resource_manager.rs:10:21
+   |
+10 | use std::any::{Any, TypeId};
+   |                     ^^^^^^
+
+warning: unused import: `error`
+  --> src\core\resource_manager.rs:13:30
+   |
+13 | use log::{info, warn, debug, error};
+   |                              ^^^^^
+
+warning: unused import: `LevelFilter`
+  --> src\utils\logger.rs:14:18
+   |
+14 | use log::{Level, LevelFilter, Log, Metadata, Record};
+   |                  ^^^^^^^^^^^
+
+warning: unused import: `Hash`
+  --> src\utils\mod.rs:14:17
+   |
+14 | use std::hash::{Hash, Hasher};
+   |                 ^^^^
+
+warning: unused imports: `debug`, `error`, `info`, and `warn`
+  --> src\utils\mod.rs:16:11
+   |
+16 | use log::{info, debug, warn, error};
+   |           ^^^^  ^^^^^  ^^^^  ^^^^^
+
+warning: unused import: `GameError`
+ --> src\assets\cache.rs:5:19
+  |
+5 | use crate::core::{GameError, Result};
+  |                   ^^^^^^^^^
+
+warning: unused import: `VecDeque`
+ --> src\assets\cache.rs:7:33
+  |
+7 | use std::collections::{HashMap, VecDeque};
+  |                                 ^^^^^^^^
+
+warning: unused import: `Hash`
+ --> src\assets\cache.rs:8:17
+  |
+8 | use std::hash::{Hash, Hasher};
+  |                 ^^^^
+
+warning: unused import: `Arc`
+ --> src\assets\cache.rs:9:17
+  |
+9 | use std::sync::{Arc, RwLock, Mutex};
+  |                 ^^^
+
+warning: unused import: `SystemTime`
+  --> src\assets\cache.rs:10:36
+   |
+10 | use std::time::{Duration, Instant, SystemTime};
+   |                                    ^^^^^^^^^^
+
+warning: unused imports: `error` and `warn`
+  --> src\assets\cache.rs:11:24
+   |
+11 | use log::{info, debug, warn, error};
+   |                        ^^^^  ^^^^^
+
+warning: unused imports: `Cursor` and `Read`
+ --> src\assets\compression.rs:8:15
+  |
+8 | use std::io::{Read, Write, Cursor};
+  |               ^^^^         ^^^^^^
+
+warning: unused imports: `error` and `warn`
+  --> src\assets\compression.rs:10:24
+   |
+10 | use log::{info, debug, warn, error};
+   |                        ^^^^  ^^^^^
+
+warning: unused import: `AssetMetadata`
+ --> src\assets\loader.rs:6:32
+  |
+6 | use crate::assets::{AssetType, AssetMetadata};
+  |                                ^^^^^^^^^^^^^
+
+warning: unused import: `error`
+  --> src\assets\loader.rs:14:30
+   |
+14 | use log::{info, debug, warn, error};
+   |                              ^^^^^
+
+warning: unused import: `ResourceType`
+  --> src\assets\mod.rs:10:70
+   |
+10 | use crate::core::resource_manager::{ResourceManager, ResourceHandle, ResourceType};
+   |                                                                      ^^^^^^^^^^^^
+
+warning: unused import: `error`
+  --> src\assets\mod.rs:16:30
+   |
+16 | use log::{info, debug, warn, error};
+   |                              ^^^^^
+
+warning: unused imports: `AudioChannels` and `ThreadPriority`
+ --> src\audio\manager.rs:6:39
+  |
+6 | use crate::audio::{AudioSystemConfig, AudioChannels, AudioBitDepth, ThreadPriority};
+  |                                       ^^^^^^^^^^^^^                 ^^^^^^^^^^^^^^
+
+warning: unused import: `error`
+  --> src\audio\manager.rs:20:30
+   |
+20 | use log::{info, debug, warn, error};
+   |                              ^^^^^
+
+warning: unused import: `ResourceType`
+ --> src\audio\sound.rs:6:70
+  |
+6 | use crate::core::resource_manager::{ResourceManager, ResourceHandle, ResourceType};
+  |                                                                      ^^^^^^^^^^^^
+
+warning: unused imports: `error`, `info`, and `warn`
+  --> src\audio\sound.rs:12:11
+   |
+12 | use log::{info, debug, warn, error};
+   |           ^^^^         ^^^^  ^^^^^
+
+warning: unused import: `ResourceHandle`
+ --> src\audio\music.rs:6:54
+  |
+6 | use crate::core::resource_manager::{ResourceManager, ResourceHandle};
+  |                                                      ^^^^^^^^^^^^^^
+
+warning: unused imports: `AudioInstance` and `AudioTransform`
+ --> src\audio\music.rs:7:35
+  |
+7 | use crate::audio::{AudioCategory, AudioInstance, AudioTransform};
+  |                                   ^^^^^^^^^^^^^  ^^^^^^^^^^^^^^
+
+warning: unused imports: `Arc` and `Mutex`
+  --> src\audio\music.rs:13:17
+   |
+13 | use std::sync::{Arc, Mutex};
+   |                 ^^^  ^^^^^
+
+warning: unused imports: `error` and `warn`
+  --> src\audio\music.rs:14:24
+   |
+14 | use log::{info, debug, warn, error};
+   |                        ^^^^  ^^^^^
+
+warning: unused import: `std::sync::Arc`
+  --> src\creature_engine\mod.rs:12:5
+   |
+12 | use std::sync::Arc;
+   |     ^^^^^^^^^^^^^^
+
+warning: unused import: `CreatureTrait`
+  --> src\creature_engine\templates.rs:22:72
+   |
+22 | use super::{CreatureEngineError, CreatureEngineResult, CreatureRarity, CreatureTrait};
+   |                                                                        ^^^^^^^^^^^^^
+
+warning: unused import: `VecDeque`
+  --> src\creature_engine\evolution_tree.rs:11:42
+   |
+11 | use std::collections::{HashMap, HashSet, VecDeque};
+   |                                          ^^^^^^^^
+
+warning: unused import: `TimeZone`
+  --> src\creature_engine\evolution_tree.rs:14:29
+   |
+14 | use chrono::{DateTime, Utc, TimeZone, Local, Timelike};
+   |                             ^^^^^^^^
+
+warning: unused import: `CreatureEngineError`
+  --> src\creature_engine\balance_system.rs:15:13
+   |
+15 | use super::{CreatureEngineError, CreatureEngineResult, GeneratedCreature, CreatureStats};
+   |             ^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `GeneratedCreature`
+  --> src\creature_engine\rarity_system.rs:16:74
+   |
+16 | use super::{CreatureEngineError, CreatureEngineResult, CreatureTemplate, GeneratedCreature};
+   |                                                                          ^^^^^^^^^^^^^^^^^
+
+warning: unused import: `GeneratedCreature`
+  --> src\creature_engine\trait_system.rs:16:74
+   |
+16 | use super::{CreatureEngineError, CreatureEngineResult, CreatureTemplate, GeneratedCreature, CreatureRarity};
+   |                                                                          ^^^^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around assigned value
+    --> src\creature_engine\trait_system.rs:1030:30
+     |
+1030 |                 *modifier *= (1.0 + (*base_stat as f64 / 100.0) * 0.1);
+     |                              ^                                       ^
+     |
+     = note: `#[warn(unused_parens)]` on by default
+help: remove these parentheses
+     |
+1030 -                 *modifier *= (1.0 + (*base_stat as f64 / 100.0) * 0.1);
+1030 +                 *modifier *= 1.0 + (*base_stat as f64 / 100.0) * 0.1;
+     |
+
+warning: unused imports: `Beta`, `Gamma`, and `Uniform`
+  --> src\creature_engine\mutation.rs:15:26
+   |
+15 | use rand_distr::{Normal, Uniform, Beta, Gamma};
+   |                          ^^^^^^^  ^^^^  ^^^^^
+
+warning: unused import: `CreatureEngineError`
+  --> src\creature_engine\mutation.rs:17:13
+   |
+17 | use super::{CreatureEngineError, CreatureEngineResult, GeneratedCreature, CreatureTrait, CreatureRarity};
+   |             ^^^^^^^^^^^^^^^^^^^
+
+warning: variant `Trade_off` should have an upper camel case name
+   --> src\creature_engine\mutation.rs:425:5
+    |
+425 |     Trade_off,
+    |     ^^^^^^^^^ help: convert the identifier to upper camel case: `TradeOff`
+    |
+    = note: `#[warn(non_camel_case_types)]` on by default
+
+warning: variant `Condition_Dependent` should have an upper camel case name
+   --> src\creature_engine\mutation.rs:605:5
+    |
+605 |     Condition_Dependent,
+    |     ^^^^^^^^^^^^^^^^^^^ help: convert the identifier to upper camel case: `ConditionDependent`
+
+warning: unused import: `HashSet`
+  --> src\creature_engine\validator.rs:11:33
+   |
+11 | use std::collections::{HashMap, HashSet};
+   |                                 ^^^^^^^
+
+warning: unused import: `regex::Regex`
+  --> src\creature_engine\validator.rs:13:5
+   |
+13 | use regex::Regex;
+   |     ^^^^^^^^^^^^
+
+warning: unused imports: `CreatureTrait` and `Mutation`
+  --> src\creature_engine\validator.rs:16:91
+   |
+16 | use super::{CreatureEngineError, CreatureEngineResult, GeneratedCreature, CreatureConfig, CreatureTrait, Mutation};
+   |                                                                                           ^^^^^^^^^^^^^  ^^^^^^^^
+
+warning: ambiguous glob re-exports
+  --> src\creature_engine\mod.rs:26:9
+   |
+26 | pub use templates::*;
+   |         ^^^^^^^^^^^^ the name `ValidationError` in the type namespace is first re-exported here
+...
+32 | pub use validator::*;
+   |         ------------ but the name `ValidationError` in the type namespace is also re-exported here
+   |
+   = note: `#[warn(ambiguous_glob_reexports)]` on by default
+
+warning: ambiguous glob re-exports
+  --> src\creature_engine\mod.rs:27:9
+   |
+27 | pub use evolution_tree::*;
+   |         ^^^^^^^^^^^^^^^^^ the name `ConditionType` in the type namespace is first re-exported here
+...
+32 | pub use validator::*;
+   |         ------------ but the name `ConditionType` in the type namespace is also re-exported here
+
+warning: ambiguous glob re-exports
+  --> src\creature_engine\mod.rs:29:9
+   |
+29 | pub use rarity_system::*;
+   |         ^^^^^^^^^^^^^^^^ the name `EventType` in the type namespace is first re-exported here
+30 | pub use trait_system::*;
+   |         --------------- but the name `EventType` in the type namespace is also re-exported here
+
+warning: ambiguous glob re-exports
+  --> src\creature_engine\mod.rs:30:9
+   |
+30 | pub use trait_system::*;
+   |         ^^^^^^^^^^^^^^^ the name `InheritancePattern` in the type namespace is first re-exported here
+31 | pub use mutation::*;
+   |         ----------- but the name `InheritancePattern` in the type namespace is also re-exported here
+
+warning: unused imports: `error` and `warn`
+  --> src\game_modes.rs:10:24
+   |
+10 | use log::{info, debug, warn, error};
+   |                        ^^^^  ^^^^^
+
+warning: unused import: `warn`
+ --> src\player\mod.rs:7:18
+  |
+7 | use log::{debug, warn, error};
+  |                  ^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src\player\inventory.rs:7:18
+  |
+7 | use log::{debug, warn, error};
+  |                  ^^^^  ^^^^^
+
+warning: unused imports: `debug` and `warn`
+ --> src\player\profile.rs:7:11
+  |
+7 | use log::{debug, warn};
+  |           ^^^^^  ^^^^
+
+warning: unused import: `warn`
+ --> src\player\progress.rs:7:18
+  |
+7 | use log::{debug, warn};
+  |                  ^^^^
+
+warning: unused imports: `debug` and `error`
+  --> src\save.rs:15:17
+   |
+15 | use log::{info, debug, warn, error};
+   |                 ^^^^^        ^^^^^
+
+warning: unused import: `warn`
+ --> src\world\mod.rs:7:18
+  |
+7 | use log::{debug, warn, error};
+  |                  ^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src\world\map.rs:7:18
+  |
+7 | use log::{debug, warn, error};
+  |                  ^^^^  ^^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src\world\npc.rs:7:18
+  |
+7 | use log::{debug, warn, error};
+  |                  ^^^^  ^^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src\world\environment.rs:7:18
+  |
+7 | use log::{debug, warn, error};
+  |                  ^^^^  ^^^^^
+
+warning: unused import: `error`
+ --> src\world\events.rs:8:24
+  |
+8 | use log::{debug, warn, error};
+  |                        ^^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src\states\mod.rs:7:18
+  |
+7 | use log::{debug, warn, error};
+  |                  ^^^^  ^^^^^
+
+warning: unused imports: `ElementType` and `UIEvent`
+ --> src\states\mod.rs:9:28
+  |
+9 | use crate::ui::{UIManager, UIEvent, ElementType};
+  |                            ^^^^^^^  ^^^^^^^^^^^
+
+warning: unused import: `glam::Vec2`
+   --> src\states\mod.rs:115:5
+    |
+115 | use glam::Vec2;
+    |     ^^^^^^^^^^
+
+warning: unused import: `error`
+ --> src\states\menu.rs:5:24
+  |
+5 | use log::{debug, warn, error};
+  |                        ^^^^^
+
+warning: unused import: `UIEvent`
+ --> src\states\menu.rs:7:41
+  |
+7 | use crate::ui::{UIManager, ElementType, UIEvent};
+  |                                         ^^^^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src\states\battle.rs:5:18
+  |
+5 | use log::{debug, warn, error};
+  |                  ^^^^  ^^^^^
+
+warning: unused import: `Vec4`
+  --> src\states\battle.rs:27:18
+   |
+27 | use glam::{Vec2, Vec4};
+   |                  ^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src\states\overworld.rs:5:18
+  |
+5 | use log::{debug, warn, error};
+  |                  ^^^^  ^^^^^
+
+warning: unused import: `error`
+ --> src\states\settings.rs:5:24
+  |
+5 | use log::{debug, warn, error};
+  |                        ^^^^^
+
+warning: unused import: `error`
+ --> src\states\loading.rs:5:24
+  |
+5 | use log::{debug, warn, error};
+  |                        ^^^^^
+
+warning: unused import: `std::collections::HashMap`
+  --> src\states\loading.rs:13:5
+   |
+13 | use std::collections::HashMap;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `warn`
+ --> src\input\gamepad.rs:7:18
+  |
+7 | use log::{debug, warn};
+  |                  ^^^^
+
+warning: unused import: `EventSystem`
+  --> src\input\mod.rs:16:40
+   |
+16 | use crate::core::event_system::{Event, EventSystem};
+   |                                        ^^^^^^^^^^^
+
+warning: unused import: `warn`
+  --> src\input\mod.rs:19:18
+   |
+19 | use log::{debug, warn};
+   |                  ^^^^
+
+warning: unused import: `error`
+ --> src\data\mod.rs:8:24
+  |
+8 | use log::{debug, warn, error, info};
+  |                        ^^^^^
+
+warning: unused import: `error`
+ --> src\data\loader.rs:9:24
+  |
+9 | use log::{debug, warn, error, info};
+  |                        ^^^^^
+
+warning: unused import: `std::hash::Hash`
+ --> src\data\cache.rs:6:5
+  |
+6 | use std::hash::Hash;
+  |     ^^^^^^^^^^^^^^^
+
+warning: unused import: `warn`
+ --> src\data\cache.rs:9:18
+  |
+9 | use log::{debug, warn, info};
+  |                  ^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src\data\serializer.rs:7:18
+  |
+7 | use log::{debug, warn, error};
+  |                  ^^^^  ^^^^^
+
+warning: unused import: `std::path::Path`
+ --> src\data\database.rs:7:5
+  |
+7 | use std::path::Path;
+  |     ^^^^^^^^^^^^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src\data\database.rs:8:18
+  |
+8 | use log::{debug, warn, error, info};
+  |                  ^^^^  ^^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src\ecs\mod.rs:8:18
+  |
+8 | use log::{debug, warn, error, info};
+  |                  ^^^^  ^^^^^
+
+warning: unused import: `warn`
+ --> src\ecs\entity.rs:7:18
+  |
+7 | use log::{debug, warn};
+  |                  ^^^^
+
+warning: unused import: `Any`
+ --> src\ecs\component.rs:3:16
+  |
+3 | use std::any::{Any, TypeId};
+  |                ^^^
+
+warning: use of deprecated function `base64::encode`: Use Engine::encode
+   --> src\data\database.rs:288:40
+    |
+288 |             QueryValue::String(base64::encode(&data_bytes)),
+    |                                        ^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated function `base64::decode`: Use Engine::decode
+   --> src\data\database.rs:332:46
+    |
+332 |                     let data_bytes = base64::decode(data_str)
+    |                                              ^^^^^^
+
+warning: use of deprecated function `base64::decode`: Use Engine::decode
+   --> src\data\database.rs:586:25
+    |
+586 |                 base64::decode(&result)
+    |                         ^^^^^^
+
+warning: use of deprecated function `base64::encode`: Use Engine::encode
+   --> src\data\database.rs:629:75
+    |
+629 |             rusqlite::types::Value::Blob(b) => QueryValue::String(base64::encode(&b)),
+    |                                                                           ^^^^^^
+
+Some errors have detailed explanations: E0432, E0433.
+For more information about an error, try `rustc --explain E0432`.
+warning: `pokemongo` (lib) generated 86 warnings
+warning: pokemongo@0.1.0: native feature鏈惎鐢紝璺宠繃C++妯″潡缂栬瘧
+error: could not compile `pokemongo` (lib) due to 27 previous errors; 86 warnings emitted
+warning: build failed, waiting for other jobs to finish...
