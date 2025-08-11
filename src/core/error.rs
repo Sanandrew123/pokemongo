@@ -128,6 +128,12 @@ impl From<toml::de::Error> for GameError {
     }
 }
 
+impl From<rusqlite::Error> for GameError {
+    fn from(error: rusqlite::Error) -> Self {
+        GameError::Database(error.to_string())
+    }
+}
+
 // 错误创建辅助宏
 #[macro_export]
 macro_rules! game_error {

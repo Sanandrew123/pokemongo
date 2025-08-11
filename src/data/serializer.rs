@@ -16,7 +16,7 @@ pub struct DataSerializer {
     version_handlers: HashMap<String, Box<dyn VersionHandler>>,
     
     // 格式处理器
-    format_handlers: HashMap<SerializationFormat, Box<dyn FormatHandler>>,
+    format_handlers: HashMap<SerializationFormat, FormatHandler>,
     
     // 统计信息
     statistics: SerializerStatistics,
@@ -52,12 +52,62 @@ pub trait VersionHandler: Send + Sync {
     fn validate(&self, data: &[u8], version: &str) -> Result<bool, GameError>;
 }
 
-// 格式处理器
-pub trait FormatHandler: Send + Sync {
-    fn serialize<T: Serialize>(&self, data: &T) -> Result<Vec<u8>, GameError>;
-    fn deserialize<T: for<'de> Deserialize<'de>>(&self, data: &[u8]) -> Result<T, GameError>;
-    fn get_content_type(&self) -> &'static str;
-    fn supports_pretty_print(&self) -> bool;
+// 格式处理器枚举 - 解决dyn兼容性问题
+#[derive(Debug)]
+pub enum FormatHandler {
+    Json(JsonHandler),
+    Binary(BinaryHandler),
+    MessagePack(MessagePackHandler),
+    Cbor(CborHandler),
+    Yaml(YamlHandler),
+    Toml(TomlHandler),
+    Xml(XmlHandler),
+}
+
+impl FormatHandler {
+    pub fn serialize<T: Serialize>(&self, data: &T) -> Result<Vec<u8>, GameError> {
+        match self {
+            FormatHandler::Json(handler) => handler.serialize(data),
+            FormatHandler::Binary(handler) => handler.serialize(data),
+            FormatHandler::MessagePack(handler) => handler.serialize(data),
+            FormatHandler::Cbor(handler) => handler.serialize(data),
+            FormatHandler::Yaml(handler) => handler.serialize(data),
+            FormatHandler::Toml(handler) => handler.serialize(data),
+            FormatHandler::Xml(handler) => handler.serialize(data),
+        }
+    }
+    
+    pub fn deserialize<T: for<'de> Deserialize<'de>>(&self, data: &[u8]) -> Result<T, GameError> {
+        match self {
+            FormatHandler::Json(handler) => handler.deserialize(data),
+            FormatHandler::Binary(handler) => handler.deserialize(data),
+            FormatHandler::MessagePack(handler) => handler.deserialize(data),
+            FormatHandler::Cbor(handler) => handler.deserialize(data),
+            FormatHandler::Yaml(handler) => handler.deserialize(data),
+            FormatHandler::Toml(handler) => handler.deserialize(data),
+            FormatHandler::Xml(handler) => handler.deserialize(data),
+        }
+    }
+    
+    pub fn get_content_type(&self) -> &'static str {
+        match self {
+            FormatHandler::Json(_) => "application/json",
+            FormatHandler::Binary(_) => "application/octet-stream",
+            FormatHandler::MessagePack(_) => "application/msgpack",
+            FormatHandler::Cbor(_) => "application/cbor",
+            FormatHandler::Yaml(_) => "application/x-yaml",
+            FormatHandler::Toml(_) => "application/toml",
+            FormatHandler::Xml(_) => "application/xml",
+        }
+    }
+    
+    pub fn supports_pretty_print(&self) -> bool {
+        match self {
+            FormatHandler::Json(_) | FormatHandler::Yaml(_) | 
+            FormatHandler::Toml(_) | FormatHandler::Xml(_) => true,
+            _ => false,
+        }
+    }
 }
 
 // 序列化结果
@@ -109,8 +159,13 @@ impl DataSerializer {
         };
         
         // 注册默认格式处理器
-        serializer.register_format_handler(SerializationFormat::JSON, Box::new(JsonHandler));
-        serializer.register_format_handler(SerializationFormat::Binary, Box::new(BinaryHandler));
+        serializer.register_format_handler(SerializationFormat::JSON, FormatHandler::Json(JsonHandler));
+        serializer.register_format_handler(SerializationFormat::Binary, FormatHandler::Binary(BinaryHandler));
+        serializer.register_format_handler(SerializationFormat::MessagePack, FormatHandler::MessagePack(MessagePackHandler));
+        serializer.register_format_handler(SerializationFormat::CBOR, FormatHandler::Cbor(CborHandler));
+        serializer.register_format_handler(SerializationFormat::YAML, FormatHandler::Yaml(YamlHandler));
+        serializer.register_format_handler(SerializationFormat::TOML, FormatHandler::Toml(TomlHandler));
+        serializer.register_format_handler(SerializationFormat::XML, FormatHandler::Xml(XmlHandler));
         
         serializer
     }
@@ -122,7 +177,7 @@ impl DataSerializer {
     }
     
     // 注册格式处理器
-    pub fn register_format_handler(&mut self, format: SerializationFormat, handler: Box<dyn FormatHandler>) {
+    pub fn register_format_handler(&mut self, format: SerializationFormat, handler: FormatHandler) {
         self.format_handlers.insert(format, handler);
         debug!("注册格式处理器: {:?}", format);
     }
@@ -382,52 +437,131 @@ impl DataSerializer {
 }
 
 // JSON格式处理器
-struct JsonHandler;
+#[derive(Debug)]
+pub struct JsonHandler;
 
-impl FormatHandler for JsonHandler {
-    fn serialize<T: Serialize>(&self, data: &T) -> Result<Vec<u8>, GameError> {
+impl JsonHandler {
+    pub fn serialize<T: Serialize>(&self, data: &T) -> Result<Vec<u8>, GameError> {
         let json_string = serde_json::to_string(data)
             .map_err(|e| GameError::Data(format!("JSON序列化失败: {}", e)))?;
         Ok(json_string.into_bytes())
     }
     
-    fn deserialize<T: for<'de> Deserialize<'de>>(&self, data: &[u8]) -> Result<T, GameError> {
+    pub fn deserialize<T: for<'de> Deserialize<'de>>(&self, data: &[u8]) -> Result<T, GameError> {
         let json_string = String::from_utf8(data.to_vec())
             .map_err(|e| GameError::Data(format!("UTF-8解码失败: {}", e)))?;
         
         serde_json::from_str(&json_string)
             .map_err(|e| GameError::Data(format!("JSON反序列化失败: {}", e)))
     }
-    
-    fn get_content_type(&self) -> &'static str {
-        "application/json"
-    }
-    
-    fn supports_pretty_print(&self) -> bool {
-        true
-    }
 }
 
 // 二进制格式处理器
-struct BinaryHandler;
+#[derive(Debug)]
+pub struct BinaryHandler;
 
-impl FormatHandler for BinaryHandler {
-    fn serialize<T: Serialize>(&self, data: &T) -> Result<Vec<u8>, GameError> {
+impl BinaryHandler {
+    pub fn serialize<T: Serialize>(&self, data: &T) -> Result<Vec<u8>, GameError> {
         bincode::serialize(data)
             .map_err(|e| GameError::Data(format!("二进制序列化失败: {}", e)))
     }
     
-    fn deserialize<T: for<'de> Deserialize<'de>>(&self, data: &[u8]) -> Result<T, GameError> {
+    pub fn deserialize<T: for<'de> Deserialize<'de>>(&self, data: &[u8]) -> Result<T, GameError> {
         bincode::deserialize(data)
             .map_err(|e| GameError::Data(format!("二进制反序列化失败: {}", e)))
     }
-    
-    fn get_content_type(&self) -> &'static str {
-        "application/octet-stream"
+}
+
+// MessagePack格式处理器
+#[derive(Debug)]
+pub struct MessagePackHandler;
+
+impl MessagePackHandler {
+    pub fn serialize<T: Serialize>(&self, data: &T) -> Result<Vec<u8>, GameError> {
+        rmp_serde::to_vec(data)
+            .map_err(|e| GameError::Data(format!("MessagePack序列化失败: {}", e)))
     }
     
-    fn supports_pretty_print(&self) -> bool {
-        false
+    pub fn deserialize<T: for<'de> Deserialize<'de>>(&self, data: &[u8]) -> Result<T, GameError> {
+        rmp_serde::from_slice(data)
+            .map_err(|e| GameError::Data(format!("MessagePack反序列化失败: {}", e)))
+    }
+}
+
+// CBOR格式处理器
+#[derive(Debug)]
+pub struct CborHandler;
+
+impl CborHandler {
+    pub fn serialize<T: Serialize>(&self, data: &T) -> Result<Vec<u8>, GameError> {
+        serde_cbor::to_vec(data)
+            .map_err(|e| GameError::Data(format!("CBOR序列化失败: {}", e)))
+    }
+    
+    pub fn deserialize<T: for<'de> Deserialize<'de>>(&self, data: &[u8]) -> Result<T, GameError> {
+        serde_cbor::from_slice(data)
+            .map_err(|e| GameError::Data(format!("CBOR反序列化失败: {}", e)))
+    }
+}
+
+// YAML格式处理器
+#[derive(Debug)]
+pub struct YamlHandler;
+
+impl YamlHandler {
+    pub fn serialize<T: Serialize>(&self, data: &T) -> Result<Vec<u8>, GameError> {
+        let yaml_string = serde_yaml::to_string(data)
+            .map_err(|e| GameError::Data(format!("YAML序列化失败: {}", e)))?;
+        Ok(yaml_string.into_bytes())
+    }
+    
+    pub fn deserialize<T: for<'de> Deserialize<'de>>(&self, data: &[u8]) -> Result<T, GameError> {
+        let yaml_string = String::from_utf8(data.to_vec())
+            .map_err(|e| GameError::Data(format!("UTF-8解码失败: {}", e)))?;
+        
+        serde_yaml::from_str(&yaml_string)
+            .map_err(|e| GameError::Data(format!("YAML反序列化失败: {}", e)))
+    }
+}
+
+// TOML格式处理器
+#[derive(Debug)]
+pub struct TomlHandler;
+
+impl TomlHandler {
+    pub fn serialize<T: Serialize>(&self, data: &T) -> Result<Vec<u8>, GameError> {
+        let toml_string = toml::to_string(data)
+            .map_err(|e| GameError::Data(format!("TOML序列化失败: {}", e)))?;
+        Ok(toml_string.into_bytes())
+    }
+    
+    pub fn deserialize<T: for<'de> Deserialize<'de>>(&self, data: &[u8]) -> Result<T, GameError> {
+        let toml_string = String::from_utf8(data.to_vec())
+            .map_err(|e| GameError::Data(format!("UTF-8解码失败: {}", e)))?;
+        
+        toml::from_str(&toml_string)
+            .map_err(|e| GameError::Data(format!("TOML反序列化失败: {}", e)))
+    }
+}
+
+// XML格式处理器
+#[derive(Debug)]
+pub struct XmlHandler;
+
+impl XmlHandler {
+    pub fn serialize<T: Serialize>(&self, data: &T) -> Result<Vec<u8>, GameError> {
+        // 使用quick-xml和serde进行XML序列化
+        let xml_string = quick_xml::se::to_string(data)
+            .map_err(|e| GameError::Data(format!("XML序列化失败: {}", e)))?;
+        Ok(xml_string.into_bytes())
+    }
+    
+    pub fn deserialize<T: for<'de> Deserialize<'de>>(&self, data: &[u8]) -> Result<T, GameError> {
+        let xml_string = String::from_utf8(data.to_vec())
+            .map_err(|e| GameError::Data(format!("UTF-8解码失败: {}", e)))?;
+        
+        quick_xml::de::from_str(&xml_string)
+            .map_err(|e| GameError::Data(format!("XML反序列化失败: {}", e)))
     }
 }
 

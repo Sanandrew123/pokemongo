@@ -54,6 +54,9 @@ pub struct LoadingTask {
     pub start_time: std::time::Instant,
 }
 
+unsafe impl Send for LoadingTask {}
+unsafe impl Sync for LoadingTask {}
+
 // 加载状态
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LoadingStatus {
@@ -91,6 +94,9 @@ pub struct DataMetadata {
     pub optional: bool,
 }
 
+unsafe impl Send for DataMetadata {}
+unsafe impl Sync for DataMetadata {}
+
 // 数据包
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DataPackage {
@@ -99,6 +105,9 @@ pub struct DataPackage {
     pub compressed: bool,
     pub encrypted: bool,
 }
+
+unsafe impl Send for DataPackage {}
+unsafe impl Sync for DataPackage {}
 
 impl DataManager {
     pub fn new() -> Result<Self, GameError> {
@@ -143,7 +152,7 @@ impl DataManager {
         }
         
         // 从数据库加载
-        if let Some(ref database) = self.database {
+        if let Some(database) = &mut self.database {
             if let Ok(data) = database.load_data::<T>(data_type, id) {
                 self.cache.set(cache_key.clone(), data.clone());
                 debug!("从数据库加载数据: {} ({})", cache_key, std::any::type_name::<T>());
@@ -209,7 +218,7 @@ impl DataManager {
         self.cache.set(cache_key.clone(), data.clone());
         
         // 保存到数据库
-        if let Some(ref mut database) = self.database {
+        if let Some(database) = &mut self.database {
             database.save_data(data_type, id, data)?;
             debug!("数据已保存到数据库: {}", cache_key);
         } else {
@@ -370,6 +379,9 @@ pub struct DataStats {
     pub average_load_time: f32,
 }
 
+unsafe impl Send for DataStats {}
+unsafe impl Sync for DataStats {}
+
 // 数据配置
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DataConfig {
@@ -380,6 +392,9 @@ pub struct DataConfig {
     pub backup_enabled: bool,
     pub backup_interval: f32,
 }
+
+unsafe impl Send for DataConfig {}
+unsafe impl Sync for DataConfig {}
 
 impl Default for DataConfig {
     fn default() -> Self {

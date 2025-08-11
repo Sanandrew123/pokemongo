@@ -419,7 +419,8 @@ impl GameDatabase {
     pub fn backup(&self, backup_path: &str) -> Result<(), GameError> {
         match &self.connection {
             DatabaseConnection::SQLite(conn) => {
-                let backup = rusqlite::backup::Backup::new(conn, &rusqlite::Connection::open(backup_path)?)
+                let dest_conn = rusqlite::Connection::open(backup_path)?;
+                let backup = rusqlite::backup::Backup::new(conn, &dest_conn)
                     .map_err(|e| GameError::Database(format!("创建备份失败: {}", e)))?;
                 
                 backup.run_to_completion(5, std::time::Duration::from_millis(250), None)
@@ -600,7 +601,8 @@ impl GameDatabase {
                 
                 let rows = stmt.query_map(sqlite_params.as_slice(), |row| {
                     let mut result_row = Vec::new();
-                    for i in 0..row.column_count() {
+                    let column_count = row.as_ref().column_count();
+                    for i in 0..column_count {
                         let value: rusqlite::types::Value = row.get(i)?;
                         let query_value = self.convert_sqlite_value(value);
                         result_row.push(query_value);
