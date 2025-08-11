@@ -22,8 +22,8 @@ pub mod settings;
 pub mod loading;
 
 // Bevy States枚举 - 符合Bevy状态管理要求
-#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
-pub enum GameState {
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash)]
+pub enum BevyGameState {
     #[default]
     Loading,        // 加载状态（默认）
     MainMenu,       // 主菜单
@@ -37,11 +37,29 @@ pub enum GameState {
     Credits,        // 制作人员
 }
 
+impl States for BevyGameState {
+    type Iter = std::array::IntoIter<Self, 9>;
+
+    fn variants() -> Self::Iter {
+        [
+            Self::Loading,
+            Self::MainMenu,
+            Self::GameMenu,
+            Self::Overworld,
+            Self::Battle,
+            Self::Inventory,
+            Self::Pokemon,
+            Self::Settings,
+            Self::Pause,
+        ].into_iter()
+    }
+}
+
 // 状态ID类型
 pub type StateId = u32;
 
 // 游戏状态类型
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum GameStateType {
     Loading,        // 加载状态
     MainMenu,       // 主菜单
@@ -68,7 +86,7 @@ pub enum StateTransition {
 }
 
 // 游戏状态接口
-pub trait GameState: Send {
+pub trait StateHandler: Send {
     fn get_type(&self) -> GameStateType;
     fn get_name(&self) -> &str;
     
@@ -106,7 +124,7 @@ pub trait GameState: Send {
 pub struct StateInfo {
     pub id: StateId,
     pub state_type: GameStateType,
-    pub state: Box<dyn GameState>,
+    pub state: Box<dyn StateHandler>,
     pub paused: bool,
     pub transparent: bool,
     pub blocks_input: bool,
@@ -124,7 +142,7 @@ pub struct StateManager {
     pending_transitions: Vec<StateTransition>,
     
     // 状态工厂
-    state_factories: HashMap<GameStateType, Box<dyn Fn() -> Box<dyn GameState> + Send>>,
+    state_factories: HashMap<GameStateType, Box<dyn Fn() -> Box<dyn StateHandler> + Send>>,
     
     // 配置
     max_stack_depth: usize,
@@ -161,7 +179,7 @@ impl StateManager {
     // 注册状态工厂
     pub fn register_state_factory<F>(&mut self, state_type: GameStateType, factory: F)
     where
-        F: Fn() -> Box<dyn GameState> + Send + 'static,
+        F: Fn() -> Box<dyn StateHandler> + Send + 'static,
     {
         self.state_factories.insert(state_type, Box::new(factory));
         debug!("注册状态工厂: {:?}", state_type);

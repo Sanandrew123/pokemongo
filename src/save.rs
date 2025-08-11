@@ -295,13 +295,13 @@ impl SaveManager {
         
         Ok(Some(SaveInfo {
             slot,
-            player_name: save.player.name.clone(),
-            player_level: save.player.level,
+            player_name: save.player.display_name.clone(),
+            player_level: save.player.level_info.level,
             playtime: save.playtime,
             last_saved: save.last_saved,
-            badges: save.player.badges.len() as u8,
-            pokedex_count: save.player.pokedex.caught.len() as u16,
-            location: save.player.location.area.clone(),
+            badges: save.player.progress.badges.len() as u8,
+            pokedex_count: save.player.pokedex.len() as u16,
+            location: save.player.location.map_id.clone(),
         }))
     }
     
@@ -361,7 +361,7 @@ impl SaveManager {
     pub fn update_playtime(&mut self, delta: Duration) {
         if let Some(save) = &mut self.current_save {
             save.playtime += delta;
-            save.player.playtime += delta;
+            save.player.stats.playtime += delta;
         }
     }
     
@@ -421,11 +421,11 @@ impl SaveManager {
         }
         
         // 基本数据完整性检查
-        if save.player.name.is_empty() {
+        if save.player.display_name.is_empty() {
             return Err(GameError::SaveError("玩家名称为空".to_string()));
         }
         
-        if save.player.party.is_empty() {
+        if save.player.pokemon_team.party.is_empty() {
             warn!("玩家队伍为空");
         }
         
@@ -439,7 +439,6 @@ impl SaveManager {
         checksum = checksum.wrapping_add(save.version as u64);
         checksum = checksum.wrapping_add(save.created_at);
         checksum = checksum.wrapping_add(save.player.id);
-        checksum = checksum.wrapping_add(save.player.trainer_id as u64);
         
         // 可以添加更多字段用于校验和计算
         

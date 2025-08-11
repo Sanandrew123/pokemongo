@@ -663,7 +663,7 @@ impl GameState for BattleState {
         // 检查是否点击了招式按钮
         for (i, &button_id) in self.move_buttons.iter().enumerate() {
             // 简化的点击检测
-            if event.pressed {
+            if event.state == crate::input::mouse::MouseState::Pressed {
                 if let Some(player_pokemon) = self.player_team.get(self.active_player) {
                     if i < player_pokemon.moves.len() {
                         let move_id = player_pokemon.moves[i];

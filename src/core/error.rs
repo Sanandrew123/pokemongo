@@ -45,6 +45,27 @@ pub enum GameError {
     Map(String),
     Network(String),
     
+    // IO错误
+    IOError(String),
+    
+    // 状态错误
+    State(String),
+    
+    // 系统错误
+    SystemError(String),
+    
+    // 压缩错误
+    CompressionError(String),
+    
+    // 序列化错误
+    SerializationError(String),
+    
+    // 玩家错误
+    Player(String),
+    
+    // 物品错误
+    Inventory(String),
+    
     // 泛型错误
     GenericError(String),
     
@@ -57,6 +78,10 @@ pub enum GameError {
     NotImplemented(String),
     Unknown(String),
 }
+
+// Result类型别名
+pub type Result<T> = std::result::Result<T, GameError>;
+pub type GameResult<T> = std::result::Result<T, GameError>;
 
 impl fmt::Display for GameError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -131,6 +156,12 @@ impl From<toml::de::Error> for GameError {
 impl From<rusqlite::Error> for GameError {
     fn from(error: rusqlite::Error) -> Self {
         GameError::Database(error.to_string())
+    }
+}
+
+impl From<std::time::SystemTimeError> for GameError {
+    fn from(error: std::time::SystemTimeError) -> Self {
+        GameError::SystemError(error.to_string())
     }
 }
 

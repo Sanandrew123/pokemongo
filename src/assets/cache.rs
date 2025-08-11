@@ -125,6 +125,7 @@ struct LRUNode {
 }
 
 // 资源缓存
+#[derive(Debug)]
 pub struct AssetCache {
     entries: RwLock<HashMap<String, CacheEntry>>,
     lru_order: Mutex<HashMap<String, LRUNode>>,

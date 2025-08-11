@@ -418,7 +418,7 @@ pub struct ConfigValidator;
 
 impl ConfigValidator {
     // 验证数值范围
-    pub fn validate_range<T: PartialOrd + Copy>(value: T, min: T, max: T, name: &str) -> Result<T> {
+    pub fn validate_range<T: PartialOrd + Copy + std::fmt::Debug>(value: T, min: T, max: T, name: &str) -> Result<T> {
         if value < min || value > max {
             Err(GameError::ConfigError(format!("{} 超出范围 [{:?}, {:?}]", name, min, max)))
         } else {
@@ -670,55 +670,6 @@ fn num_cpus() -> usize {
 }
 
 // 重复的Color定义已删除
-
-impl Color {
-    pub const WHITE: Color = Color { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
-    pub const BLACK: Color = Color { r: 0.0, g: 0.0, b: 0.0, a: 1.0 };
-    pub const RED: Color = Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
-    pub const GREEN: Color = Color { r: 0.0, g: 1.0, b: 0.0, a: 1.0 };
-    pub const BLUE: Color = Color { r: 0.0, g: 0.0, b: 1.0, a: 1.0 };
-    pub const TRANSPARENT: Color = Color { r: 0.0, g: 0.0, b: 0.0, a: 0.0 };
-    
-    pub fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
-        Self {
-            r: r.clamp(0.0, 1.0),
-            g: g.clamp(0.0, 1.0),
-            b: b.clamp(0.0, 1.0),
-            a: a.clamp(0.0, 1.0),
-        }
-    }
-    
-    pub fn rgb(r: f32, g: f32, b: f32) -> Self {
-        Self::new(r, g, b, 1.0)
-    }
-    
-    pub fn from_hex(hex: u32) -> Self {
-        let r = ((hex >> 24) & 0xFF) as f32 / 255.0;
-        let g = ((hex >> 16) & 0xFF) as f32 / 255.0;
-        let b = ((hex >> 8) & 0xFF) as f32 / 255.0;
-        let a = (hex & 0xFF) as f32 / 255.0;
-        Self { r, g, b, a }
-    }
-    
-    pub fn to_hex(&self) -> u32 {
-        let r = (self.r * 255.0) as u32;
-        let g = (self.g * 255.0) as u32;
-        let b = (self.b * 255.0) as u32;
-        let a = (self.a * 255.0) as u32;
-        
-        (r << 24) | (g << 16) | (b << 8) | a
-    }
-    
-    pub fn lerp(&self, other: &Color, t: f32) -> Color {
-        let t = t.clamp(0.0, 1.0);
-        Color {
-            r: self.r + (other.r - self.r) * t,
-            g: self.g + (other.g - self.g) * t,
-            b: self.b + (other.b - self.b) * t,
-            a: self.a + (other.a - self.a) * t,
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {

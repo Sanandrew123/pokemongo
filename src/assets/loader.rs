@@ -381,6 +381,15 @@ impl LoadStats {
     }
 }
 
+impl std::fmt::Debug for AssetLoader {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AssetLoader")
+            .field("parsers_count", &self.parsers.len())
+            .field("load_stats", &self.load_stats)
+            .finish()
+    }
+}
+
 impl AssetLoader {
     pub fn new() -> Self {
         let mut loader = Self {

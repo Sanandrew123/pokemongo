@@ -223,7 +223,7 @@ impl Default for InputState {
 
 impl InputState {
     pub fn is_action_pressed(&self, action: &InputAction) -> bool {
-        self.action_states.get(action).unwrap_or(&0.0) > 0.0
+        *self.action_states.get(action).unwrap_or(&0.0) > 0.0
     }
     
     pub fn is_action_just_pressed(&self, action: &InputAction) -> bool {

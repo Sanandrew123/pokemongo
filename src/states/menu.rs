@@ -318,11 +318,16 @@ impl GameState for MainMenuState {
     
     fn handle_mouse_event(&mut self, event: &MouseEvent) -> Result<bool, GameError> {
         // 委托给UI管理器处理
-        let handled = self.ui_manager.handle_mouse_event(
-            event.position,
-            Some(event.button),
-            event.pressed,
-        )?;
+        let is_pressed = event.state == crate::input::mouse::MouseState::Pressed;
+        let handled = if let Some(button) = event.button {
+            self.ui_manager.handle_mouse_event(
+                event.position,
+                Some(button),
+                is_pressed,
+            )?
+        } else {
+            false
+        };
         
         if handled {
             // 检查是否点击了菜单按钮

@@ -10,7 +10,7 @@ use std::time::{Duration, Instant};
 use log::{info, debug, warn, error};
 
 // 游戏模式枚举
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum GameMode {
     MainStory,      // 主线剧情
     FreeRoam,       // 自由探索

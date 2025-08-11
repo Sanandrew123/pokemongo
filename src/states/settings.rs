@@ -377,7 +377,7 @@ impl GameState for SettingsState {
         // 检查分类按钮点击
         for (category, button_id) in &self.category_buttons {
             // 简化的点击检测实现
-            if event.pressed {
+            if event.state == crate::input::mouse::MouseState::Pressed {
                 self.switch_category(*category)?;
                 return Ok(true);
             }

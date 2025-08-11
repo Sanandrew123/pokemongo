@@ -372,7 +372,7 @@ impl Environment {
                 self.ambient_temperature = 35.0;
                 self.humidity = 0.1;
                 self.lighting.ambient_light = Vec4::new(1.2, 1.1, 0.9, 1.0);
-                self.add_particle_emitter("sand_particles", Vec3::ZERO, EffectType::Dust);
+                self.add_particle_emitter("sand_particles".to_string(), Vec3::ZERO, EffectType::Dust);
             },
             BiomeType::Forest => {
                 self.ambient_temperature = 18.0;

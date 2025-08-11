@@ -67,7 +67,7 @@ pub enum GamepadAxis {
 }
 
 // 手柄类型
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum GamepadType {
     Xbox360,
     XboxOne,

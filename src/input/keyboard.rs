@@ -72,7 +72,7 @@ pub struct KeyboardEvent {
 }
 
 // 修饰键状态
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct KeyModifiers {
     pub shift: bool,
     pub ctrl: bool,
