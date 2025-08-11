@@ -91,7 +91,7 @@ impl OverworldState {
     }
 }
 
-impl GameState for OverworldState {
+impl StateHandler for OverworldState {
     fn get_type(&self) -> GameStateType {
         GameStateType::Overworld
     }

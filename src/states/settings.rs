@@ -308,7 +308,7 @@ impl SettingsState {
     }
 }
 
-impl GameState for SettingsState {
+impl StateHandler for SettingsState {
     fn get_type(&self) -> GameStateType {
         GameStateType::Settings
     }

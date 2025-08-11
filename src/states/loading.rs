@@ -318,7 +318,7 @@ impl LoadingState {
     }
 }
 
-impl GameState for LoadingState {
+impl StateHandler for LoadingState {
     fn get_type(&self) -> GameStateType {
         GameStateType::Loading
     }
