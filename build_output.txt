@@ -1,442 +1,22 @@
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on build directory
-   Compiling bevy_ecs v0.14.2
    Compiling pokemongo v0.1.0 (C:\Users\w2107\Desktop\pk1\pokemongo)
 warning: pokemongo@0.1.0: native feature鏈惎鐢紝璺宠繃C++妯″潡缂栬瘧
-   Compiling bevy_app v0.14.2
-   Compiling bevy_core v0.14.2
-   Compiling bevy_time v0.14.2
-   Compiling bevy_a11y v0.14.2
-   Compiling bevy_asset v0.14.2
-   Compiling bevy_input v0.14.2
-   Compiling bevy_log v0.14.2
-   Compiling bevy_window v0.14.2
-   Compiling bevy_hierarchy v0.14.2
-   Compiling bevy_diagnostic v0.14.2
-   Compiling bevy_transform v0.14.2
-   Compiling bevy_state v0.14.2
-   Compiling bevy_gilrs v0.14.2
-   Compiling bevy_winit v0.14.2
-   Compiling bevy_render v0.14.2
-   Compiling bevy_audio v0.14.2
-   Compiling bevy_core_pipeline v0.14.2
-   Compiling bevy_scene v0.14.2
-   Compiling bevy_animation v0.14.2
-   Compiling bevy_sprite v0.14.2
-   Compiling bevy_pbr v0.14.2
-   Compiling bevy_text v0.14.2
-   Compiling bevy_ui v0.14.2
-   Compiling bevy_gltf v0.14.2
-   Compiling bevy_gizmos v0.14.2
-   Compiling bevy_internal v0.14.2
-   Compiling bevy v0.14.2
-error[E0432]: unresolved imports `notify::watcher`, `notify::DebouncedEvent`
-  --> src\creature_engine\templates.rs:18:38
+error[E0405]: cannot find trait `GameState` in this scope
+  --> src\states\overworld.rs:94:6
    |
-18 | use notify::{Watcher, RecursiveMode, watcher, DebouncedEvent};
-   |                                      ^^^^^^^  ^^^^^^^^^^^^^^ no `DebouncedEvent` in the root
-   |                                      |
-   |                                      no `watcher` in the root
-   |                                      help: a similar name exists in the module (notice the capitalization): `Watcher`
+94 | impl GameState for OverworldState {
+   |      ^^^^^^^^^ not found in this scope
 
-error[E0433]: failed to resolve: could not find `pokemon` in the crate root
-  --> src\player\mod.rs:9:12
-   |
-9  | use crate::pokemon::stats::PokemonStats;
-   |            ^^^^^^^ could not find `pokemon` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:13:9
-   |
-13 | pub mod pokemon;
-   |         ^^^^^^^
-note: the item is gated behind the `pokemon-wip` feature
-  --> src\lib.rs:12:7
-   |
-12 | #[cfg(feature = "pokemon-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `pokemon` in the crate root
-  --> src\player\mod.rs:10:12
-   |
-10 | use crate::pokemon::types::DualType;
-   |            ^^^^^^^ could not find `pokemon` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:13:9
-   |
-13 | pub mod pokemon;
-   |         ^^^^^^^
-note: the item is gated behind the `pokemon-wip` feature
-  --> src\lib.rs:12:7
-   |
-12 | #[cfg(feature = "pokemon-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0432]: unresolved import `crate::pokemon`
-  --> src\game_modes.rs:6:12
-   |
-6  | use crate::pokemon::{Pokemon, PokemonSpecies, SpeciesId};
-   |            ^^^^^^^ could not find `pokemon` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:13:9
-   |
-13 | pub mod pokemon;
-   |         ^^^^^^^
-note: the item is gated behind the `pokemon-wip` feature
-  --> src\lib.rs:12:7
-   |
-12 | #[cfg(feature = "pokemon-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `graphics` in the crate root
-  --> src\world\map.rs:9:12
-   |
-9  | use crate::graphics::renderer::Renderer2D;
-   |            ^^^^^^^^ could not find `graphics` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:19:9
-   |
-19 | pub mod graphics;
-   |         ^^^^^^^^
-note: the item is gated behind the `graphics-wip` feature
-  --> src\lib.rs:18:7
-   |
-18 | #[cfg(feature = "graphics-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `graphics` in the crate root
-  --> src\world\map.rs:10:12
-   |
-10 | use crate::graphics::sprite::SpriteManager;
-   |            ^^^^^^^^ could not find `graphics` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:19:9
-   |
-19 | pub mod graphics;
-   |         ^^^^^^^^
-note: the item is gated behind the `graphics-wip` feature
-  --> src\lib.rs:18:7
-   |
-18 | #[cfg(feature = "graphics-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `pokemon` in the crate root
-  --> src\world\npc.rs:9:12
-   |
-9  | use crate::pokemon::stats::PokemonStats;
-   |            ^^^^^^^ could not find `pokemon` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:13:9
-   |
-13 | pub mod pokemon;
-   |         ^^^^^^^
-note: the item is gated behind the `pokemon-wip` feature
-  --> src\lib.rs:12:7
-   |
-12 | #[cfg(feature = "pokemon-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0432]: unresolved import `crate::pokemon`
-  --> src\save.rs:8:12
-   |
-8  | use crate::pokemon::Pokemon;
-   |            ^^^^^^^ could not find `pokemon` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:13:9
-   |
-13 | pub mod pokemon;
-   |         ^^^^^^^
-note: the item is gated behind the `pokemon-wip` feature
-  --> src\lib.rs:12:7
-   |
-12 | #[cfg(feature = "pokemon-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `graphics` in the crate root
-  --> src\states\overworld.rs:8:12
-   |
-8  | use crate::graphics::ui::UIManager;
-   |            ^^^^^^^^ could not find `graphics` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:19:9
-   |
-19 | pub mod graphics;
-   |         ^^^^^^^^
-note: the item is gated behind the `graphics-wip` feature
-  --> src\lib.rs:18:7
-   |
-18 | #[cfg(feature = "graphics-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0432]: unresolved import `crate::graphics`
-  --> src\states\overworld.rs:7:12
-   |
-7  | use crate::graphics::Renderer2D;
-   |            ^^^^^^^^ could not find `graphics` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:19:9
-   |
-19 | pub mod graphics;
-   |         ^^^^^^^^
-note: the item is gated behind the `graphics-wip` feature
-  --> src\lib.rs:18:7
-   |
-18 | #[cfg(feature = "graphics-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `graphics` in the crate root
-  --> src\states\settings.rs:8:12
-   |
-8  | use crate::graphics::ui::{UIManager, ElementType};
-   |            ^^^^^^^^ could not find `graphics` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:19:9
-   |
-19 | pub mod graphics;
-   |         ^^^^^^^^
-note: the item is gated behind the `graphics-wip` feature
-  --> src\lib.rs:18:7
-   |
-18 | #[cfg(feature = "graphics-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0432]: unresolved import `crate::graphics`
-  --> src\states\settings.rs:7:12
-   |
-7  | use crate::graphics::Renderer2D;
-   |            ^^^^^^^^ could not find `graphics` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:19:9
-   |
-19 | pub mod graphics;
-   |         ^^^^^^^^
-note: the item is gated behind the `graphics-wip` feature
-  --> src\lib.rs:18:7
-   |
-18 | #[cfg(feature = "graphics-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `graphics` in the crate root
-  --> src\states\loading.rs:8:12
-   |
-8  | use crate::graphics::ui::{UIManager, ElementType, UIEvent};
-   |            ^^^^^^^^ could not find `graphics` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:19:9
-   |
-19 | pub mod graphics;
-   |         ^^^^^^^^
-note: the item is gated behind the `graphics-wip` feature
-  --> src\lib.rs:18:7
-   |
-18 | #[cfg(feature = "graphics-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0432]: unresolved import `crate::graphics`
-  --> src\states\loading.rs:7:12
-   |
-7  | use crate::graphics::Renderer2D;
-   |            ^^^^^^^^ could not find `graphics` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:19:9
-   |
-19 | pub mod graphics;
-   |         ^^^^^^^^
-note: the item is gated behind the `graphics-wip` feature
-  --> src\lib.rs:18:7
-   |
-18 | #[cfg(feature = "graphics-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0432]: unresolved import `super::GameState`
-  --> src\states\overworld.rs:11:13
-   |
-11 | use super::{GameState, GameStateType, StateTransition};
-   |             ^^^^^^^^^ no `GameState` in `states`
-   |
-   = help: consider importing this enum instead:
-           crate::game_modes::GameState
-
-error[E0432]: unresolved import `super::GameState`
-  --> src\states\settings.rs:11:13
-   |
-11 | use super::{GameState, GameStateType, StateTransition};
-   |             ^^^^^^^^^ no `GameState` in `states`
-   |
-   = help: consider importing this enum instead:
-           crate::game_modes::GameState
-
-error[E0432]: unresolved import `super::GameState`
-  --> src\states\loading.rs:11:13
-   |
-11 | use super::{GameState, GameStateType, StateTransition};
-   |             ^^^^^^^^^ no `GameState` in `states`
-   |
-   = help: consider importing this enum instead:
-           crate::game_modes::GameState
-
-error[E0432]: unresolved import `gamepad::GamepadId`
-  --> src\input\mod.rs:12:63
-   |
-12 | pub use gamepad::{GamepadManager, GamepadButton, GamepadAxis, GamepadId};
-   |                                                               ^^^^^^^^^ no `GamepadId` in `input::gamepad`
-
-error[E0432]: unresolved imports `touch::TouchPhase`, `touch::TouchId`
-  --> src\input\mod.rs:13:43
-   |
-13 | pub use touch::{TouchManager, TouchEvent, TouchPhase, TouchId};
-   |                                           ^^^^^^^^^^  ^^^^^^^ no `TouchId` in `input::touch`
-   |                                           |
-   |                                           no `TouchPhase` in `input::touch`
-   |                                           help: a similar name exists in the module: `TouchState`
-
-error[E0433]: failed to resolve: could not find `pokemon` in the crate root
-  --> src\player\mod.rs:67:24
-   |
-67 |     pub nature: crate::pokemon::stats::Nature,
-   |                        ^^^^^^^ could not find `pokemon` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:13:9
-   |
-13 | pub mod pokemon;
-   |         ^^^^^^^
-note: the item is gated behind the `pokemon-wip` feature
-  --> src\lib.rs:12:7
-   |
-12 | #[cfg(feature = "pokemon-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `pokemon` in the crate root
-  --> src\player\mod.rs:68:35
-   |
-68 |     pub individual_values: crate::pokemon::stats::IndividualValues,
-   |                                   ^^^^^^^ could not find `pokemon` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:13:9
-   |
-13 | pub mod pokemon;
-   |         ^^^^^^^
-note: the item is gated behind the `pokemon-wip` feature
-  --> src\lib.rs:12:7
-   |
-12 | #[cfg(feature = "pokemon-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `pokemon` in the crate root
-  --> src\player\mod.rs:69:31
-   |
-69 |     pub effort_values: crate::pokemon::stats::EffortValues,
-   |                               ^^^^^^^ could not find `pokemon` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:13:9
-   |
-13 | pub mod pokemon;
-   |         ^^^^^^^
-note: the item is gated behind the `pokemon-wip` feature
-  --> src\lib.rs:12:7
-   |
-12 | #[cfg(feature = "pokemon-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `graphics` in the crate root
-  --> src\world\map.rs:73:28
-   |
-73 |     pub blend_mode: crate::graphics::renderer::BlendMode,
-   |                            ^^^^^^^^ could not find `graphics` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:19:9
-   |
-19 | pub mod graphics;
-   |         ^^^^^^^^
-note: the item is gated behind the `graphics-wip` feature
-  --> src\lib.rs:18:7
-   |
-18 | #[cfg(feature = "graphics-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `graphics` in the crate root
-   --> src\world\map.rs:116:42
+error[E0405]: cannot find trait `GameState` in this scope
+   --> src\states\settings.rs:311:6
     |
-116 |     pub vertex_buffer: Option<Vec<crate::graphics::renderer::Vertex>>,
-    |                                          ^^^^^^^^ could not find `graphics` in the crate root
-    |
-note: found an item that was configured out
-   --> src\lib.rs:19:9
-    |
-19  | pub mod graphics;
-    |         ^^^^^^^^
-note: the item is gated behind the `graphics-wip` feature
-   --> src\lib.rs:18:7
-    |
-18  | #[cfg(feature = "graphics-wip")]
-    |       ^^^^^^^^^^^^^^^^^^^^^^^^
+311 | impl GameState for SettingsState {
+    |      ^^^^^^^^^ not found in this scope
 
-error[E0433]: failed to resolve: could not find `graphics` in the crate root
-   --> src\world\map.rs:312:32
+error[E0405]: cannot find trait `GameState` in this scope
+   --> src\states\loading.rs:321:6
     |
-312 |             blend_mode: crate::graphics::renderer::BlendMode::Alpha,
-    |                                ^^^^^^^^ could not find `graphics` in the crate root
-    |
-note: found an item that was configured out
-   --> src\lib.rs:19:9
-    |
-19  | pub mod graphics;
-    |         ^^^^^^^^
-note: the item is gated behind the `graphics-wip` feature
-   --> src\lib.rs:18:7
-    |
-18  | #[cfg(feature = "graphics-wip")]
-    |       ^^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `pokemon` in the crate root
-  --> src\world\mod.rs:88:64
-   |
-88 |     Pokemon { species_id: u32, level: u8, stats: Option<crate::pokemon::stats::PokemonStats> },
-   |                                                                ^^^^^^^ could not find `pokemon` in the crate root
-   |
-note: found an item that was configured out
-  --> src\lib.rs:13:9
-   |
-13 | pub mod pokemon;
-   |         ^^^^^^^
-note: the item is gated behind the `pokemon-wip` feature
-  --> src\lib.rs:12:7
-   |
-12 | #[cfg(feature = "pokemon-wip")]
-   |       ^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0433]: failed to resolve: could not find `pokemon` in the crate root
-   --> src\data\mod.rs:268:58
-    |
-268 |                     let _: Result<HashMap<String, crate::pokemon::species::PokemonSpecies>, _> = 
-    |                                                          ^^^^^^^ could not find `pokemon` in the crate root
-    |
-note: found an item that was configured out
-   --> src\lib.rs:13:9
-    |
-13  | pub mod pokemon;
-    |         ^^^^^^^
-note: the item is gated behind the `pokemon-wip` feature
-   --> src\lib.rs:12:7
-    |
-12  | #[cfg(feature = "pokemon-wip")]
-    |       ^^^^^^^^^^^^^^^^^^^^^^^
+321 | impl GameState for LoadingState {
+    |      ^^^^^^^^^ not found in this scope
 
 warning: unused imports: `error` and `warn`
   --> src\core\config.rs:22:21
@@ -614,6 +194,12 @@ warning: unused import: `std::sync::Arc`
 12 | use std::sync::Arc;
    |     ^^^^^^^^^^^^^^
 
+warning: unused import: `std::time::Duration`
+  --> src\creature_engine\templates.rs:20:5
+   |
+20 | use std::time::Duration;
+   |     ^^^^^^^^^^^^^^^^^^^
+
 warning: unused import: `CreatureTrait`
   --> src\creature_engine\templates.rs:22:72
    |
@@ -744,9 +330,9 @@ warning: ambiguous glob re-exports
    |         ----------- but the name `InheritancePattern` in the type namespace is also re-exported here
 
 warning: unused imports: `error` and `warn`
-  --> src\game_modes.rs:10:24
+  --> src\game_modes.rs:30:24
    |
-10 | use log::{info, debug, warn, error};
+30 | use log::{info, debug, warn, error};
    |                        ^^^^  ^^^^^
 
 warning: unused import: `warn`
@@ -774,9 +360,9 @@ warning: unused import: `warn`
   |                  ^^^^
 
 warning: unused imports: `debug` and `error`
-  --> src\save.rs:15:17
+  --> src\save.rs:24:17
    |
-15 | use log::{info, debug, warn, error};
+24 | use log::{info, debug, warn, error};
    |                 ^^^^^        ^^^^^
 
 warning: unused import: `warn`
@@ -857,6 +443,12 @@ warning: unused imports: `error` and `warn`
 5 | use log::{debug, warn, error};
   |                  ^^^^  ^^^^^
 
+warning: unused import: `StateHandler`
+  --> src\states\overworld.rs:18:13
+   |
+18 | use super::{StateHandler, GameStateType, StateTransition};
+   |             ^^^^^^^^^^^^
+
 warning: unused import: `error`
  --> src\states\settings.rs:5:24
   |
@@ -869,10 +461,16 @@ warning: unused import: `error`
 5 | use log::{debug, warn, error};
   |                        ^^^^^
 
-warning: unused import: `std::collections::HashMap`
-  --> src\states\loading.rs:13:5
+warning: unused import: `UIEvent`
+  --> src\states\loading.rs:15:41
    |
-13 | use std::collections::HashMap;
+15 | use crate::ui::{UIManager, ElementType, UIEvent};
+   |                                         ^^^^^^^
+
+warning: unused import: `std::collections::HashMap`
+  --> src\states\loading.rs:20:5
+   |
+20 | use std::collections::HashMap;
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 warning: unused import: `warn`
@@ -979,9 +577,7 @@ warning: use of deprecated function `base64::encode`: Use Engine::encode
 629 |             rusqlite::types::Value::Blob(b) => QueryValue::String(base64::encode(&b)),
     |                                                                           ^^^^^^
 
-Some errors have detailed explanations: E0432, E0433.
-For more information about an error, try `rustc --explain E0432`.
-warning: `pokemongo` (lib) generated 86 warnings
+For more information about this error, try `rustc --explain E0405`.
+warning: `pokemongo` (lib) generated 89 warnings
 warning: pokemongo@0.1.0: native feature鏈惎鐢紝璺宠繃C++妯″潡缂栬瘧
-error: could not compile `pokemongo` (lib) due to 27 previous errors; 86 warnings emitted
-warning: build failed, waiting for other jobs to finish...
+error: could not compile `pokemongo` (lib) due to 3 previous errors; 89 warnings emitted
