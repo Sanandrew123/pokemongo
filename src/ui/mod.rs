@@ -76,6 +76,85 @@ impl UIManager {
     pub fn get_events(&mut self) -> Vec<UIEvent> {
         std::mem::take(&mut self.event_queue)
     }
+    
+    // 创建UI元素
+    pub fn create_element(&mut self, id: String, element_type: ElementType) -> Result<(), GameError> {
+        let element = UIElement {
+            id: id.clone(),
+            element_type,
+            position: (0.0, 0.0),
+            size: (100.0, 30.0),
+            visible: true,
+            enabled: true,
+        };
+        self.elements.insert(id, element);
+        Ok(())
+    }
+    
+    // 设置元素文本
+    pub fn set_element_text(&mut self, id: &str, text: String) -> Result<(), GameError> {
+        if let Some(element) = self.elements.get_mut(id) {
+            // 在实际实现中，这里应该设置元素的文本属性
+            // 目前只是占位符实现
+            Ok(())
+        } else {
+            Err(GameError::UIError(format!("元素不存在: {}", id)))
+        }
+    }
+    
+    // 设置元素位置
+    pub fn set_element_position(&mut self, id: &str, position: (f32, f32)) -> Result<(), GameError> {
+        if let Some(element) = self.elements.get_mut(id) {
+            element.position = position;
+            Ok(())
+        } else {
+            Err(GameError::UIError(format!("元素不存在: {}", id)))
+        }
+    }
+    
+    // 设置元素大小
+    pub fn set_element_size(&mut self, id: &str, size: (f32, f32)) -> Result<(), GameError> {
+        if let Some(element) = self.elements.get_mut(id) {
+            element.size = size;
+            Ok(())
+        } else {
+            Err(GameError::UIError(format!("元素不存在: {}", id)))
+        }
+    }
+    
+    // 添加事件处理器
+    pub fn add_event_handler(&mut self, id: &str, handler: fn(&UIEvent)) -> Result<(), GameError> {
+        // 在实际实现中，这里应该存储事件处理器
+        // 目前只是占位符实现
+        if self.elements.contains_key(id) {
+            Ok(())
+        } else {
+            Err(GameError::UIError(format!("元素不存在: {}", id)))
+        }
+    }
+    
+    // 设置焦点
+    pub fn set_focus(&mut self, id: &str) -> Result<(), GameError> {
+        if self.elements.contains_key(id) {
+            // 在实际实现中，这里应该管理焦点状态
+            Ok(())
+        } else {
+            Err(GameError::UIError(format!("元素不存在: {}", id)))
+        }
+    }
+    
+    // 处理鼠标事件
+    pub fn handle_mouse_event(&mut self, x: f32, y: f32, button: u32) -> Result<(), GameError> {
+        // 检查哪个元素被点击
+        for (id, element) in &self.elements {
+            if x >= element.position.0 && x <= element.position.0 + element.size.0 &&
+               y >= element.position.1 && y <= element.position.1 + element.size.1 {
+                self.handle_event(UIEvent::Click(id.clone()));
+                break;
+            }
+        }
+        Ok(())
+    }
 }
 
 impl Default for UIManager {

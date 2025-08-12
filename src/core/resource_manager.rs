@@ -83,12 +83,13 @@ impl<T> ResourceHandle<T> {
 }
 
 // 资源加载器特征
-pub trait ResourceLoader<T>: Send + Sync {
+pub trait ResourceLoader<T>: Send + Sync + std::fmt::Debug {
     fn load(&self, path: &Path) -> Result<T>;
     fn get_supported_extensions(&self) -> Vec<&'static str>;
 }
 
 // 纹理加载器
+#[derive(Debug)]
 pub struct TextureLoader;
 
 impl ResourceLoader<Vec<u8>> for TextureLoader {
@@ -102,6 +103,7 @@ impl ResourceLoader<Vec<u8>> for TextureLoader {
 }
 
 // 音频加载器
+#[derive(Debug)]
 pub struct AudioLoader;
 
 impl ResourceLoader<Vec<u8>> for AudioLoader {
@@ -115,6 +117,7 @@ impl ResourceLoader<Vec<u8>> for AudioLoader {
 }
 
 // 数据加载器
+#[derive(Debug)]
 pub struct DataLoader;
 
 impl ResourceLoader<String> for DataLoader {
@@ -346,6 +349,60 @@ impl ResourceManager {
         } else {
             None
         }
+    }
+
+    // 存储资源到管理器中
+    pub fn store_resource<T: 'static + Clone + Send + Sync>(
+        &self,
+        name: String,
+        resource: T,
+    ) -> ResourceHandle<T> {
+        let id = self.generate_id();
+        let metadata = ResourceMetadata {
+            id,
+            name: name.clone(),
+            path: PathBuf::new(), // 内存资源没有路径
+            resource_type: ResourceType::Custom("memory".to_string()),
+            size: std::mem::size_of_val(&resource) as u64,
+            state: ResourceState::Loaded,
+            last_used: Instant::now(),
+            ref_count: 1,
+            priority: ResourcePriority::Normal,
+        };
+
+        let metadata_arc = Arc::new(RwLock::new(metadata));
+        
+        // 创建句柄
+        let handle = ResourceHandle {
+            id,
+            resource: Arc::new(RwLock::new(Some(resource.clone()))),
+            metadata: metadata_arc.clone(),
+        };
+
+        // 存储资源
+        self.resources.write().unwrap().insert(id, Box::new(resource));
+        self.metadata.write().unwrap().insert(id, metadata_arc);
+        self.name_to_id.write().unwrap().insert(name, id);
+
+        // 更新统计
+        {
+            let mut stats = self.stats.write().unwrap();
+            stats.total_resources += 1;
+            stats.loaded_resources += 1;
+            stats.memory_used += std::mem::size_of_val(&handle.resource) as u64;
+        }
+
+        handle
+    }
+
+    // 根据名称获取资源数据
+    pub fn get_resource<T: 'static + Clone>(&self, name: &str) -> Option<T> {
+        if let Some(handle) = self.get::<T>(name) {
+            if let Some(resource_arc) = handle.get() {
+                return Some(resource_arc.read().unwrap().clone());
+            }
+        }
+        None
     }
     
     // 卸载资源

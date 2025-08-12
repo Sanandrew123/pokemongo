@@ -289,7 +289,7 @@ trait AnomalyDetectionAlgorithm {
     fn get_confidence_level(&self) -> f64;
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct RarityAnomaly {
     anomaly_type: AnomalyType,
     affected_rarities: Vec<CreatureRarity>,
@@ -298,7 +298,7 @@ struct RarityAnomaly {
     suggested_actions: Vec<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 enum AnomalyType {
     UnexpectedSpike,
     UnexpectedDrop,
@@ -1003,7 +1003,7 @@ impl RaritySystem {
             }
             ConditionType::TimeOfDay(start, end) => {
                 let now = chrono::Local::now();
-                let hour = now.hour() as u8;
+                let hour = now.time().hour() as u8;
                 Ok(hour >= *start && hour <= *end)
             }
             ConditionType::Season(season) => {

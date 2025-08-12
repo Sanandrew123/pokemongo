@@ -66,7 +66,7 @@ pub struct CreatureGenerator {
     stat_calculators: HashMap<String, Box<dyn StatCalculator + Send + Sync>>,
 }
 
-pub trait StatCalculator {
+pub trait StatCalculator: std::fmt::Debug {
     fn calculate_stat(&self, base: u32, level: u8, iv: u8, ev: u8, nature_modifier: f64) -> u32;
     fn get_stat_name(&self) -> &str;
 }

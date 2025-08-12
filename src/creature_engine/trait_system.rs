@@ -362,7 +362,7 @@ struct CombinationAnalysis {
     potential_improvements: Vec<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct OptimizationSuggestion {
     current_traits: Vec<String>,
     suggested_changes: Vec<TraitChange>,
@@ -371,7 +371,7 @@ struct OptimizationSuggestion {
     risk_assessment: f64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 enum TraitChange {
     AddTrait(String),
     RemoveTrait(String),
@@ -761,7 +761,7 @@ trait PerformancePredictionModel {
     fn update_model(&mut self, training_data: &[(Vec<CreatureTrait>, f64)]);
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PerformancePrediction {
     predicted_score: f64,
     confidence_interval: (f64, f64),

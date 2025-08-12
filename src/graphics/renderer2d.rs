@@ -172,6 +172,30 @@ impl Renderer2D {
         // 这里需要一个默认的白色纹理句柄
         debug!("绘制矩形: pos={:?}, size={:?}, filled={}", position, size, filled);
     }
+
+    // 绘制四边形
+    pub fn draw_quad(
+        &mut self,
+        position: Vec2,
+        size: Vec2,
+        rotation: f32,
+        color: Color4,
+        layer: RenderLayer,
+    ) {
+        // 创建一个默认的白色纹理句柄用于纯色四边形
+        // 在实际实现中，这应该是一个预加载的1x1白色纹理
+        let white_texture = Handle::default(); // 占位符
+        
+        self.draw_sprite(
+            white_texture,
+            position,
+            size,
+            rotation,
+            color,
+            None, // 使用整个纹理
+            layer,
+        );
+    }
     
     // 结束帧并提交渲染
     pub fn end_frame(&mut self, commands: &mut Commands) -> Result<()> {

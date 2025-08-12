@@ -312,7 +312,7 @@ impl EvolutionTree {
         edges.sort_by(|a, b| b.weight().success_rate.partial_cmp(&a.weight().success_rate).unwrap());
 
         if let Some(edge) = edges.first() {
-            let target_node = &self.graph[edge.target()];
+            let target_node = &self.graph[edge.1];
             Ok(target_node.creature_id.clone())
         } else {
             Err(CreatureEngineError::EvolutionError("No evolution available".to_string()))
@@ -327,7 +327,7 @@ impl EvolutionTree {
         let outgoing_edges = self.graph.edges(*node_idx);
         
         for edge in outgoing_edges {
-            let target_node = &self.graph[edge.target()];
+            let target_node = &self.graph[edge.1];
             evolutions.push(target_node.creature_id.clone());
         }
 
@@ -377,7 +377,7 @@ impl EvolutionTree {
         
         if let Some(time_windows) = self.requirements.time_windows.get(creature_id) {
             let now = Local::now();
-            let current_hour = now.hour() as u8;
+            let current_hour = now.time().hour() as u8;
             let current_day = now.weekday().num_days_from_monday() as u8;
 
             for window in time_windows {
@@ -448,7 +448,7 @@ impl EvolutionTree {
                 
                 let outgoing: Vec<_> = self.graph.edges(current).collect();
                 if let Some(edge) = outgoing.first() {
-                    current = edge.target();
+                    current = edge.1;
                 } else {
                     break;
                 }
@@ -495,7 +495,7 @@ impl EvolutionTree {
                 let node_idx = self.node_map.get(&creature.template_id).unwrap();
                 
                 if let Some(edge) = self.graph.edges(*node_idx)
-                    .find(|e| self.graph[e.target()].creature_id == evolution_id) {
+                    .find(|e| self.graph[e.1].creature_id == evolution_id) {
                     
                     let requirements_analysis = self.analyze_requirements(creature, &edge.weight().requirements)?;
                     
